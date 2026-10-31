@@ -1,0 +1,1642 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#10111c">
+  <meta name="description" content="Путь Шиноби — браузерный RPG-кликер по мотивам мира Naruto.">
+  <title>Путь Шиноби</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;700&family=Press+Start+2P&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@900&text=%E5%BF%8D%E7%81%AB%E5%BD%B1%E5%9C%9F%E9%9B%86%E7%9C%BC%E6%8B%B3%E8%BB%A2&display=swap">
+  <style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
+#skills{grid-template-columns:repeat(4,minmax(0,1fr))}
+.skill{min-width:0}
+@media(max-width:520px){#skills{grid-template-columns:repeat(4,minmax(0,1fr))}.skill .sn{font-size:10px}}
+
+/* Chronicle, trials and passive milestones */
+.chronicle-head{display:grid;grid-template-columns:1.2fr .8fr;gap:12px;align-items:stretch}
+.rank-card,.trial,.lore-card{border:1px solid var(--line);background:rgba(255,255,255,.025);border-radius:12px;padding:12px}
+.rank-card{display:flex;flex-direction:column;gap:5px}.rank-card span,.rank-card small{color:var(--muted);font-size:12px}.rank-card b{font:600 19px var(--font-display);color:var(--gold)}
+.subhead{font:600 15px var(--font-display);margin:18px 0 9px;color:var(--ink)}
+.trials,.lore-list{display:grid;gap:8px}.trial{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}.trial b,.lore-card b{display:block}.trial small,.lore-card p,.passive-line{color:var(--muted);font-size:12px;line-height:1.45}.trial .btn{white-space:nowrap}.trial.done{border-color:rgba(214,162,58,.5)}
+.lore-card p{margin:6px 0}.passive-line{padding-top:5px;border-top:1px dashed var(--line);margin-top:7px}
+@media(max-width:520px){.chronicle-head{grid-template-columns:1fr}.trial{grid-template-columns:1fr}.trial .btn{justify-self:start}}
+
+
+/* Ally dossier: lore + passive growth */
+.ally-row{cursor:pointer;transition:background .12s ease,box-shadow .12s ease}
+.ally-row:hover{background:#292d49;box-shadow:inset 0 0 0 2px #46517e}
+.ally-row:focus-visible{outline:3px solid var(--chakra);outline-offset:2px}
+.ally-row .buy{cursor:pointer}
+.ally-modal{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:16px;padding-top:max(16px,env(safe-area-inset-top,0px));padding-bottom:max(16px,env(safe-area-inset-bottom,0px))}
+.ally-modal-backdrop{position:absolute;inset:0;background:rgba(4,5,13,.82);backdrop-filter:blur(5px)}
+.ally-dialog{position:relative;z-index:1;width:min(760px,100%);max-height:min(88vh,850px);overflow:auto;background:var(--ink-2);color:var(--bone);border:2px solid var(--line);box-shadow:0 0 0 4px var(--shadow),0 24px 80px rgba(0,0,0,.55)}
+.ally-dialog-head{position:sticky;top:0;z-index:2;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 16px;background:rgba(24,26,43,.97);border-bottom:1px solid var(--line)}
+.ally-dialog-head h2{margin:0;font:400 13px/1.5 var(--font-display);color:var(--ryo)}
+.ally-close{width:36px;height:36px;flex:0 0 36px;border:0;background:var(--ink-3);color:var(--bone);font-size:24px;line-height:1;cursor:pointer;box-shadow:0 0 0 2px var(--line)}
+.ally-dialog-body{padding:16px;display:flex;flex-direction:column;gap:16px}
+.ally-identity{display:flex;align-items:center;gap:14px;padding:12px;background:var(--ink-3);box-shadow:inset 0 0 0 2px #2c3157}
+.ally-portrait{width:68px;height:68px;flex:0 0 68px;image-rendering:pixelated;background:#12142a}
+.ally-identity h3{margin:0 0 3px;font-size:19px}
+.ally-subtitle{color:var(--muted);font-size:12px}
+.ally-level{margin-top:6px;color:var(--ryo);font-weight:700;font-size:13px}
+.ally-section-title{margin:0 0 7px;font:400 11px/1.5 var(--font-display);color:var(--chakra)}
+.ally-biography{margin:0;color:var(--bone);font-size:13px;line-height:1.7}
+.ally-passives{display:grid;gap:10px}
+.ally-passive{padding:12px;background:var(--ink-3);border:1px solid var(--line)}
+.ally-passive.unlocked{border-color:rgba(88,196,138,.7);background:linear-gradient(110deg,rgba(88,196,138,.09),rgba(34,37,61,.95) 45%)}
+.ally-passive-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.ally-passive h4{margin:0;font-size:14px}
+.ally-passive-effect{margin:4px 0 0;color:var(--chakra);font-size:12px}
+.ally-passive-state{flex:0 0 auto;padding:3px 7px;background:#292d49;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.04em}
+.legend-roster{margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}
+.legend-roster .subhead{margin-top:0;color:var(--ryo)}
+.legend-roster .note{margin:0 0 10px}
+.legend-roster li{border-color:rgba(214,162,58,.45)}
+.legend-roster .chip{background:#8a6430!important;color:#fff0c7}
+.ally-passive.unlocked .ally-passive-state{background:rgba(88,196,138,.16);color:var(--jade)}
+.ally-progress{height:6px;margin:10px 0 4px;background:#111321;overflow:hidden}
+.ally-progress i{display:block;height:100%;background:var(--chakra)}
+.ally-passive.unlocked .ally-progress i{background:var(--jade)}
+.ally-progress-label{color:var(--muted);font-size:10px}
+.ally-passive-story{margin:9px 0 0;color:#c4c8dc;font-size:12px;line-height:1.65}
+.ally-dialog-foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;padding-top:12px;border-top:1px solid var(--line)}
+.ally-dialog-foot .note{flex:1 1 240px;font-size:11px}
+#allyModalUpgrade{min-width:190px}
+.modal-open{overflow:hidden}
+@media(max-width:520px){.ally-dialog{max-height:92vh}.ally-dialog-body{padding:12px}.ally-identity{align-items:flex-start}.ally-portrait{width:56px;height:56px;flex-basis:56px}.ally-passive-top{flex-direction:column}.ally-passive-state{align-self:flex-start}.ally-dialog-foot{align-items:stretch}.ally-dialog-foot .btn{width:100%}}
+
+
+
+/* Layout: battlefield scene pinned on the left, upgrade ledger on the right; stacks on phones.
+   Look: 16-bit night village. Hard pixel edges, no radius, one chakra-blue accent over ink-blue neutrals. */
+:root{
+  --ink:#10111c;        /* night */
+  --ink-2:#181a2b;      /* panel */
+  --ink-3:#22253d;      /* raised */
+  --line:#353b63;       /* stepped border */
+  --shadow:#07070e;
+  --bone:#ebe6d8;       /* text */
+  --muted:#9ea3bf;
+  --chakra:#5fc9ee;     /* accent */
+  --ryo:#e8b64c;        /* gold */
+  --blood:#e2503c;
+  --jade:#58c48a;
+  --font-display:'Press Start 2P', ui-monospace, 'Courier New', monospace;
+  --font-body:'Golos Text', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-kanji:'Noto Serif JP', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+  color-scheme: dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{
+  background:var(--ink);
+  background-image:radial-gradient(900px 380px at 82% -8%, #1d2352 0%, rgba(16,17,28,0) 62%);
+  background-repeat:no-repeat;
+  color:var(--bone);
+  font-family:var(--font-body);
+  font-size:14px;
+  line-height:1.45;
+  padding-block:20px 48px;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));
+  padding-right:max(16px, env(safe-area-inset-right, 0px));
+}
+button{font-family:inherit}
+:focus-visible{outline:3px solid var(--chakra);outline-offset:2px}
+
+.wrap{max-width:1080px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+
+/* header */
+.top{display:flex;flex-wrap:wrap;gap:14px 24px;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:12px}
+.mark{width:46px;height:46px;display:grid;place-items:center;background:var(--blood);color:var(--bone);font:900 28px/1 var(--font-kanji);box-shadow:inset 0 -4px 0 #8f2b1d,0 0 0 2px var(--shadow)}
+.logo h1{font:400 15px/1.3 var(--font-display);margin:0;letter-spacing:.03em}
+.logo small{display:block;color:var(--muted);font-size:12px;margin-top:5px}
+.stats{display:flex;flex-wrap:wrap;gap:10px;flex:1 1 320px;justify-content:flex-end}
+.stat{flex:1 1 104px;max-width:170px;min-width:0;padding:8px 12px;background:var(--ink-2);box-shadow:0 0 0 2px var(--line)}
+.stat span{display:block;color:var(--muted);font-size:10px;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.stat b{display:block;font:400 13px/1.5 var(--font-display);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.stat.gold b{color:var(--ryo)}
+.stat.dps b{color:var(--chakra)}
+.stat.eye b{color:#62d6c9}
+
+/* grid */
+.grid{display:grid;grid-template-columns:minmax(0,1fr);gap:20px}
+@media (min-width:920px){
+  .grid{grid-template-columns:minmax(0,1.12fr) minmax(0,1fr);align-items:start}
+  .stage-card{position:sticky;top:16px}
+}
+.card,.pane{background:var(--ink-2);box-shadow:0 0 0 2px var(--line),0 0 0 4px var(--shadow);padding:12px;display:flex;flex-direction:column;gap:12px;min-width:0}
+
+/* zone bar */
+.zonebar{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.region{color:var(--muted);font-size:11px;letter-spacing:.1em;text-transform:uppercase}
+.zone{font:400 17px/1.4 var(--font-display);margin-top:4px}
+.pips{display:flex;gap:4px}
+.pip{width:11px;height:11px;background:#2c3052}
+.pip.on{background:var(--jade)}
+.pips.boss .pip{background:var(--blood);animation:blink 1s steps(2) infinite}
+
+/* stage */
+.stage{position:relative;display:block;cursor:crosshair;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;box-shadow:0 0 0 2px var(--shadow)}
+.stage:focus-visible{outline:3px solid var(--chakra);outline-offset:4px}
+canvas{display:block;width:100%;height:auto;aspect-ratio:16/9;image-rendering:pixelated}
+.fx{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.hint{position:absolute;left:8px;bottom:8px;padding:4px 8px;background:rgba(7,7,14,.72);color:var(--bone);font-size:12px;pointer-events:none}
+.hint.off{display:none}
+.dmg{position:absolute;transform:translate(-50%,-50%);font:400 12px/1 var(--font-display);color:#fff;text-shadow:0 2px 0 #000,2px 0 0 #000,-2px 0 0 #000,0 -2px 0 #000;white-space:nowrap;pointer-events:none;animation:rise .85s ease-out forwards}
+.dmg.combo{color:var(--ryo);font-size:15px}
+.dmg.crit{color:var(--blood);font-size:17px}
+.dmg.burst{color:#ffb347;font-size:20px}
+.dmg.ally{color:var(--chakra);font-size:10px;opacity:.85}
+.dmg.gold{color:var(--ryo);font-size:11px}
+@keyframes rise{0%{transform:translate(-50%,-30%) scale(.7);opacity:0}14%{opacity:1;transform:translate(-50%,-70%) scale(1.15)}100%{transform:translate(-50%,-200%) scale(1);opacity:0}}
+@keyframes fade{0%{opacity:0}15%{opacity:1}100%{opacity:0}}
+@keyframes blink{50%{opacity:.35}}
+
+/* enemy */
+.enemy{display:flex;flex-direction:column;gap:6px}
+.enemy-head{display:flex;justify-content:space-between;gap:10px;font-size:13px}
+.ename{font-weight:700}
+.etype{color:var(--muted)}
+.bar{position:relative;height:22px;background:#1a0d14;box-shadow:inset 0 0 0 2px #000;overflow:hidden}
+.bar>i{position:absolute;inset:0 auto 0 0;width:100%;background:var(--blood);box-shadow:inset 0 -4px 0 rgba(0,0,0,.25)}
+.bar>span{position:relative;display:block;text-align:center;font:700 12px/22px var(--font-body);text-shadow:0 1px 0 #000;font-variant-numeric:tabular-nums}
+.bar.chk{background:#0b1a22;height:20px}
+.bar.chk>i{background:var(--chakra);box-shadow:inset 0 -4px 0 rgba(0,0,0,.22)}
+.bar.chk>span{line-height:20px;color:#fff}
+.timer{position:relative;height:18px;background:#0b1a22;box-shadow:inset 0 0 0 2px #000;overflow:hidden}
+.timer>i{position:absolute;inset:0 auto 0 0;width:100%;background:#d6a23a}
+.timer.low>i{background:var(--blood)}
+.timer>span{position:relative;display:block;text-align:center;font:700 11px/18px var(--font-body);color:#fff;text-shadow:0 1px 0 #000}
+
+/* meters + skills */
+.meters{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center}
+.combo{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px}
+.cpips{display:flex;gap:3px}
+.cp{width:12px;height:12px;background:#2c3052}
+.cp.on{background:var(--bone)}
+.cpips.ready .cp{background:var(--ryo)}
+.chakra{flex:1 1 180px;min-width:0}
+.skills{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.skill{position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;gap:3px;padding:12px 4px 8px;background:var(--ink-3);color:var(--bone);border:0;box-shadow:inset 0 -3px 0 #0b0c18,0 0 0 2px var(--line);cursor:pointer}
+.skill:hover:not([aria-disabled="true"]){background:#2b2f4d}
+.skill:active:not([aria-disabled="true"]){transform:translateY(2px)}
+.skill .kj{font:900 26px/1 var(--font-kanji);color:var(--chakra)}
+.skill .sn{font-size:11px;font-weight:700;text-align:center;line-height:1.15;max-width:100%;overflow-wrap:anywhere}
+@media (max-width:480px){.skill{padding-left:2px;padding-right:2px}.skill .sn{font-size:10px}}
+.skill .sc{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.skill .key{position:absolute;top:4px;left:5px;font:400 8px var(--font-display);color:var(--muted)}
+.skill .cd{position:absolute;left:0;right:0;bottom:0;height:0;background:rgba(5,6,14,.66);pointer-events:none}
+.skill.live{box-shadow:inset 0 -3px 0 #0b0c18,0 0 0 2px var(--chakra)}
+.skill.live .sc{color:var(--chakra)}
+.skill[aria-disabled="true"]{opacity:.6;cursor:not-allowed}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 14px;background:var(--ink-3);color:var(--bone);border:0;font:700 13px/1.2 var(--font-body);box-shadow:inset 0 -3px 0 #0b0c18,0 0 0 2px var(--line);cursor:pointer}
+.btn:hover:not(:disabled){background:#2b2f4d}
+.btn:active:not(:disabled){transform:translateY(2px)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn[aria-pressed="true"]{background:var(--bone);color:var(--ink);box-shadow:inset 0 -3px 0 #a9a392,0 0 0 2px var(--bone)}
+.nav{display:flex;gap:8px}
+.nav .btn{flex:1 1 0;min-width:0}
+.nav svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:3;flex:none}
+.god-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding-top:2px}
+.god-btn{flex:1 1 190px;background:#60313b;color:#ffe7c2;box-shadow:inset 0 -3px 0 #321922,0 0 0 2px #9b5360}
+.god-btn:hover:not(:disabled){background:#7b3d4c}
+.god-btn[aria-pressed="true"]{background:#d6a23a;color:#20170b;box-shadow:inset 0 -3px 0 #90651e,0 0 0 2px #f1cc70}
+.god-note{flex:2 1 220px;color:var(--muted);font-size:11px;line-height:1.4}
+
+/* panel */
+.panel{display:flex;flex-direction:column;gap:14px;min-width:0}
+.tabs{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:6px}
+.tab{background:var(--ink-2);color:var(--muted);border:0;padding:10px 12px;font:700 13px/1.2 var(--font-body);box-shadow:0 0 0 2px var(--line);cursor:pointer}
+.tab:hover{color:var(--bone)}
+.tab[aria-selected="true"]{background:var(--bone);color:var(--ink);box-shadow:0 0 0 2px var(--bone)}
+.howto{font-size:13px;color:var(--muted);background:var(--ink-3);padding:10px 12px;box-shadow:inset 0 0 0 2px #2c3157}
+.howto summary{cursor:pointer;color:var(--bone);font-weight:700}
+.howto ol{margin:8px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+.seg{display:flex;align-items:center;gap:6px;flex-wrap:wrap;color:var(--muted);font-size:12px}
+.seg .btn{padding:6px 10px;font-size:12px}
+.clans{display:flex;flex-wrap:wrap;gap:6px}
+.clans .chip{padding:3px 8px}
+.list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.row{display:flex;flex-wrap:wrap;gap:10px 12px;align-items:center;padding:10px;background:var(--ink-3);box-shadow:inset 0 0 0 2px #2c3157}
+.av{width:48px;height:48px;flex:0 0 48px;image-rendering:pixelated;background:#12142a}
+.av.kj{display:grid;place-items:center;font:900 26px/1 var(--font-kanji);color:var(--chakra)}
+.info{flex:1 1 150px;min-width:0;display:flex;flex-direction:column;gap:2px}
+.nm{display:flex;flex-wrap:wrap;gap:0 8px;align-items:baseline}
+.nm b{font-size:15px}
+.nm em{font-style:normal;color:var(--muted);font-size:12px}
+.meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12px;color:var(--muted)}
+.chip{display:inline-block;padding:1px 6px;font-size:11px;font-weight:700;color:#0d0e18;background:var(--muted)}
+.nums{font-size:13px;font-variant-numeric:tabular-nums}
+.next{font-size:12px;color:var(--muted)}
+.buy{flex:0 0 120px;flex-direction:column;gap:1px;background:var(--ink-2);color:var(--muted)}
+.buy .b2{font-size:12px;font-weight:500;font-variant-numeric:tabular-nums}
+.buy.ok{background:var(--ryo);color:#1b1304;box-shadow:inset 0 -3px 0 #a67d1c,0 0 0 2px var(--shadow)}
+.buy.ok:hover:not(:disabled){background:#f0c45f}
+.buy.ok.eyebuy{background:var(--chakra);color:#05212b;box-shadow:inset 0 -3px 0 #2a86a6,0 0 0 2px var(--shadow)}
+.buy.ok.eyebuy:hover:not(:disabled){background:#7bd6f3}
+.note{margin:0;color:var(--muted);font-size:13px}
+.note b{color:var(--bone)}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.fact{padding:10px 12px;background:var(--ink-3);box-shadow:inset 0 0 0 2px #2c3157}
+.fact span{display:block;color:var(--muted);font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+.fact b{font:400 14px/1.5 var(--font-display);font-variant-numeric:tabular-nums}
+.danger{background:#3a1620;color:#ffd9d2;box-shadow:inset 0 -3px 0 #1c0a10,0 0 0 2px #6b2a38}
+.danger[data-armed]{background:var(--blood);color:#fff}
+.rebirth-btn{background:var(--bone);color:var(--ink);box-shadow:inset 0 -3px 0 #a9a392,0 0 0 2px var(--shadow);padding:14px}
+.rebirth-btn[data-armed]{background:var(--ryo)}
+.sys{display:flex;flex-direction:column;gap:8px;padding-top:12px;border-top:2px dashed var(--line)}
+footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:6px 18px;justify-content:space-between}
+
+/* toasts */
+.toasts{position:fixed;left:0;right:0;bottom:0;padding-top:0;padding-bottom:calc(16px + env(safe-area-inset-bottom, 0px));padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;z-index:20}
+.toast{background:var(--bone);color:var(--ink);padding:9px 14px;font-weight:700;font-size:13px;box-shadow:0 0 0 2px var(--shadow);max-width:min(460px,100%);animation:toastin .2s ease-out}
+@keyframes toastin{from{transform:translateY(8px);opacity:0}}
+
+@media (prefers-reduced-motion: reduce){
+  .dmg{animation:fade .9s linear forwards;transform:translate(-50%,-90%)}
+  .pips.boss .pip{animation:none}
+  .toast{animation:none}
+}
+
+
+/* Telegram Mini App viewport + touch layout */
+html{min-height:100%;background:var(--ink);overscroll-behavior-y:contain}
+body{min-height:100vh;min-height:100dvh;padding-top:max(12px,env(safe-area-inset-top,0px));padding-bottom:max(24px,env(safe-area-inset-bottom,0px));overflow-x:hidden}
+button,.tab,.skill,.stage{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+@media(max-width:600px){
+  .wrap{gap:14px}
+  .top{align-items:flex-start}
+  .stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));flex-basis:100%;justify-content:stretch}
+  .stat{max-width:none}
+  .nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+  .nav .btn{min-height:42px;padding:9px 6px;font-size:12px}
+  .tabs{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .card,.pane{padding:10px;gap:10px}
+}
+@media(max-width:360px){
+  .logo h1{font-size:12px}
+  .stat{padding:7px 9px}
+  .stat b{font-size:11px}
+  .skills{gap:6px}
+  .skill .sn{font-size:9px}
+}
+</style>
+  <script src="https://telegram.org/js/telegram-web-app.js?64"></script>
+  <script>
+    // Tell Telegram that the Mini App is ready before the game bootstraps.
+    (function () {
+      var webApp = window.Telegram && window.Telegram.WebApp;
+      if (!webApp) return;
+      try {
+        webApp.ready();
+        webApp.expand();
+        if (webApp.setHeaderColor) webApp.setHeaderColor('#10111c');
+        if (webApp.setBackgroundColor) webApp.setBackgroundColor('#10111c');
+      } catch (e) { /* The game still works in a regular browser. */ }
+    })();
+  </script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="logo">
+      <div class="mark" aria-hidden="true">忍</div>
+      <div>
+        <h1>Путь Шиноби</h1>
+        <small>0.8 · Telegram Mini App · по мотивам Naruto</small>
+      </div>
+    </div>
+    <div class="stats" aria-label="Показатели">
+      <div class="stat gold"><span>Рё</span><b id="stGold">0</b></div>
+      <div class="stat dps"><span>Урон/с</span><b id="stDps">0</b></div>
+      <div class="stat"><span>Урон клика</span><b id="stClick">1</b></div>
+      <div class="stat eye" id="stEyeBox" hidden><span>Очки глаза</span><b id="stEye">0</b></div>
+    </div>
+  </header>
+
+  <main class="grid">
+    <section class="card stage-card" aria-label="Поле боя">
+      <div class="zonebar">
+        <div>
+          <div class="region" id="region">Тихий лес</div>
+          <div class="zone" id="zoneLbl">Зона 1</div>
+        </div>
+        <div class="pips" id="pips" aria-hidden="true"></div>
+      </div>
+
+      <div class="stage" id="stage" role="button" tabindex="0" aria-label="Атаковать врага: нажмите на поле боя или клавишу пробел">
+        <canvas id="cv" width="320" height="180"></canvas>
+        <div class="fx" id="fx"></div>
+        <div class="hint" id="hint">Нажимай на врага!</div>
+      </div>
+
+      <div class="enemy">
+        <div class="enemy-head"><span class="ename" id="eName">—</span><span class="etype" id="eKind"></span></div>
+        <div class="timer" id="timerBox" hidden><i id="timerFill"></i><span id="timerTxt"></span></div>
+        <div class="bar" aria-label="Здоровье врага"><i id="hpFill"></i><span id="hpTxt"></span></div>
+      </div>
+
+      <div class="meters">
+        <div class="combo"><span>Серия ударов</span><div class="cpips" id="cpips" aria-hidden="true"></div></div>
+        <div class="chakra"><div class="bar chk" aria-label="Чакра"><i id="chFill"></i><span id="chTxt"></span></div></div>
+      </div>
+
+      <div class="skills" id="skills" role="group" aria-label="Техники ниндзюцу"></div>
+
+      <div class="nav">
+        <button type="button" class="btn" id="btnBack"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 2L4 8l6 6"/></svg>Назад</button>
+        <button type="button" class="btn" id="btnAutoClick" aria-pressed="true">Авто-клик: ВКЛ</button>
+        <button type="button" class="btn" id="btnAuto" aria-pressed="true">Авто-продвижение</button>
+        <button type="button" class="btn" id="btnFwd">Вперёд<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 2l6 6-6 6"/></svg></button>
+      </div>
+      <div class="god-row">
+        <button type="button" class="btn god-btn" id="btnGod" aria-pressed="false">⚡ Режим бога: ВЫКЛ</button>
+        <span class="god-note" id="godHint">Переносит к зоне 100, усиливает весь урон и отключает таймеры боссов. Повторное нажатие выключает режим.</span>
+      </div>
+    </section>
+
+    <section class="panel" aria-label="Улучшения">
+      <div class="tabs" role="tablist" id="tabs">
+        <button type="button" class="tab" role="tab" id="tab-allies" data-tab="allies" aria-selected="true" aria-controls="pane-allies">Союзники</button>
+        <button type="button" class="tab" role="tab" id="tab-tai" data-tab="tai" aria-selected="false" aria-controls="pane-tai">Тайдзюцу</button>
+        <button type="button" class="tab" role="tab" id="tab-eye" data-tab="eye" aria-selected="false" aria-controls="pane-eye">Додзюцу</button>
+        <button type="button" class="tab" role="tab" id="tab-reb" data-tab="reb" aria-selected="false" aria-controls="pane-reb">Перерождение</button>
+        <button type="button" class="tab" role="tab" id="tab-chronicle" data-tab="chronicle" aria-selected="false" aria-controls="pane-chronicle">Летопись</button>
+      </div>
+
+      <div class="pane" id="pane-allies" role="tabpanel" aria-labelledby="tab-allies">
+        <details class="howto" open>
+          <summary>Как играть</summary>
+          <ol>
+            <li>Нажимай на врага: каждый клик наносит урон. Каждый 5-й удар сильнее. Авто-клик наносит такой же базовый урон, как ручной удар.</li>
+            <li>За побеждённых врагов получаешь Рё. Трать их на союзников: они бьют сами.</li>
+            <li>Используй техники под полем боя, когда заполнена чакра. Каждые 5 зон тебя ждёт босс, а каждые 100 зон — легендарный противник из мира шиноби. Победи его, чтобы временно завербовать.</li>
+          </ol>
+        </details>
+        <div class="seg" id="buyMode" role="group" aria-label="Сколько уровней покупать">
+          <span>Покупать:</span>
+          <button type="button" class="btn" data-mode="1" aria-pressed="true">×1</button>
+          <button type="button" class="btn" data-mode="10" aria-pressed="false">×10</button>
+          <button type="button" class="btn" data-mode="max" aria-pressed="false">Макс</button>
+        </div>
+        <div class="clans" id="clans" aria-label="Кланы"></div>
+        <ul class="list" id="listAllies"></ul>
+        <section class="legend-roster" id="legendRosterWrap" hidden>
+          <h3 class="subhead">ЛЕГЕНДАРНЫЕ СОЮЗНИКИ</h3>
+          <p class="note">Поверженные боссы сражаются на твоей стороне до следующего перерождения.</p>
+          <ul class="list" id="legendRoster"></ul>
+        </section>
+      </div>
+
+      <div class="pane" id="pane-tai" role="tabpanel" aria-labelledby="tab-tai" hidden>
+        <p class="note"><b>Тайдзюцу</b> усиливает твои собственные удары. Улучшения действуют до перерождения.</p>
+        <ul class="list" id="listTai"></ul>
+      </div>
+
+      <div class="pane" id="pane-eye" role="tabpanel" aria-labelledby="tab-eye" hidden>
+        <p class="note" id="eyeLocked"><b>Техники глаз</b> откроются после первого перерождения. Очки глаза навсегда усиливают все будущие циклы.</p>
+        <div id="eyeBody" hidden>
+          <p class="note">Очки глаза: <b id="eyePts">0</b>. Они не сбрасываются при перерождении.</p>
+          <ul class="list" id="listEye" style="margin-top:12px"></ul>
+        </div>
+      </div>
+
+      <div class="pane" id="pane-reb" role="tabpanel" aria-labelledby="tab-reb" hidden>
+        <p class="note"><b>Перерождение</b> сбрасывает Рё, зоны, постоянных союзников, временных легендарных союзников и тайдзюцу. Взамен ты получаешь очки глаза, и новый путь проходится быстрее. Доступно с зоны 25.</p>
+        <div class="facts">
+          <div class="fact"><span>Лучшая зона цикла</span><b id="rbBest">1</b></div>
+          <div class="fact"><span>Очки за перерождение</span><b id="rbGain">0</b></div>
+          <div class="fact"><span>Перерождений</span><b id="rbCount">0</b></div>
+        </div>
+        <button type="button" class="btn rebirth-btn" id="btnRebirth">Переродиться</button>
+        <p class="note" id="rbHint"></p>
+        <div class="sys">
+          <p class="note">Игра автоматически сохраняется на этом устройстве каждые несколько секунд. В Telegram сохранение отдельно от обычного браузера.</p>
+          <button type="button" class="btn danger" id="btnReset">Стереть сохранение</button>
+        </div>
+      </div>
+
+      <div class="pane" id="pane-chronicle" role="tabpanel" aria-labelledby="tab-chronicle" hidden>
+        <div class="chronicle-head">
+          <p class="note"><b>Путь шиноби</b> — история отряда, его пробуждение и испытания. Пассивные способности союзников открываются на 10, 25, 50 и 100 уровнях.</p>
+          <div class="rank-card"><span>Текущий ранг</span><b id="rankName">Ученик Академии</b><small id="rankHint">Продвигайся по зонам, чтобы получить новое звание.</small></div>
+        </div>
+        <h3 class="subhead">Испытания ранга</h3>
+        <div id="trials" class="trials"></div>
+        <h3 class="subhead">Истории союзников</h3>
+        <div id="loreList" class="lore-list"></div>
+        <h3 class="subhead">Легендарные враги, ставшие союзниками</h3>
+        <div id="legendLore" class="lore-list"></div>
+      </div>
+    </section>
+  </main>
+
+  <div class="ally-modal" id="allyModal" hidden aria-hidden="true">
+    <div class="ally-modal-backdrop" data-ally-close></div>
+    <section class="ally-dialog" role="dialog" aria-modal="true" aria-labelledby="allyModalTitle">
+      <header class="ally-dialog-head">
+        <h2 id="allyModalTitle">ДОСЬЕ СОЮЗНИКА</h2>
+        <button type="button" class="ally-close" id="allyModalClose" aria-label="Закрыть окно">×</button>
+      </header>
+      <div class="ally-dialog-body">
+        <div class="ally-identity">
+          <img class="ally-portrait" id="allyModalPortrait" width="68" height="68" alt="">
+          <div>
+            <h3 id="allyModalName">—</h3>
+            <div class="ally-subtitle" id="allyModalSubtitle">—</div>
+            <div class="ally-level" id="allyModalLevel">Уровень 0</div>
+          </div>
+        </div>
+        <section>
+          <h3 class="ally-section-title" id="allyModalLoreTitle">ЛИЧНАЯ ИСТОРИЯ</h3>
+          <p class="ally-biography" id="allyModalBio"></p>
+        </section>
+        <section>
+          <h3 class="ally-section-title" id="allyModalPassivesTitle">ПАССИВНЫЕ СПОСОБНОСТИ И ИХ ИСТОРИИ</h3>
+          <p class="note" style="margin:0 0 10px">Каждая пассивка пробуждается автоматически на указанном уровне союзника. История показывает, через какое испытание он прошёл, чтобы овладеть способностью.</p>
+          <div class="ally-passives" id="allyModalPassives"></div>
+        </section>
+        <div class="ally-dialog-foot">
+          <p class="note" id="allyModalHint">Повышай уровень союзника, чтобы открывать новые пассивки.</p>
+          <button type="button" class="btn buy ok" id="allyModalUpgrade"><span class="b1">Повысить</span><span class="b2"></span></button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    <span>По мотивам мира Naruto. Легендарные союзники остаются в отряде до перерождения.</span>
+    <span>Клавиши: пробел — удар, 1–8 — техники</span>
+  </footer>
+</div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script>
+(function () {
+'use strict';
+
+// Telegram Web Apps API is optional: the same file remains playable in a normal browser.
+const TG = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+function tgHaptic(style) {
+  try { if (TG && TG.HapticFeedback) TG.HapticFeedback.impactOccurred(style || 'light'); } catch (e) {}
+}
+function tgBackButton(show) {
+  try { if (TG && TG.BackButton) show ? TG.BackButton.show() : TG.BackButton.hide(); } catch (e) {}
+}
+if (TG && TG.BackButton) {
+  TG.BackButton.onClick(() => {
+    const modal = document.querySelector('#allyModal');
+    if (modal && !modal.hidden) closeAllyModal();
+  });
+}
+
+/* ================= constants & data ================= */
+const W = 320, H = 180, GROUND = 150;
+const ZONE_KILLS = 10, HP_G = 1.6, BOSS_HP = 6, GOLD_R = 0.06, CRIT_MULT = 5;
+const KEY = 'put-shinobi-v1'; // сохранение совместимо с предыдущими версиями 0.7
+const REDUCE = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+const CLAN_COL = { 'Узумаки': '#e58a32', 'Коноха': '#5ea0e8', 'Учиха': '#b85b68', 'Хатаке': '#9ca9c8', 'Хьюга': '#62c5c8', 'Нара': '#8e86bb' };
+
+const BIOMES = [
+  { name: 'Тихий лес',        sky: ['#0e1530', '#2b3a67'], stars: true,  orb: '#e8e4d6', orbR: 13, far: '#1d2a4a', near: '#0f192d', type: 'pines',   ground: '#16223a', line: '#2f4a6e', pal: { c: '#7a5238', d: '#4a2f20', a: '#d9a441' } },
+  { name: 'Бамбуковая роща',  sky: ['#0f2828', '#2e6b5e'], stars: true,  orb: '#e8f0d0', orbR: 12, far: '#1c4a44', near: '#0e2a28', type: 'bamboo',  ground: '#143a35', line: '#3a8a6e', pal: { c: '#4f8a4a', d: '#2c5a2e', a: '#e0d070' } },
+  { name: 'Багровые дюны',    sky: ['#3a1a2a', '#d9774a'], stars: false, orb: '#ffd9a0', orbR: 17, far: '#a8503a', near: '#6e2f2b', type: 'dunes',   ground: '#8a4533', line: '#d98a5a', pal: { c: '#b0602e', d: '#6e3418', a: '#f0d080' } },
+  { name: 'Каменные пики',    sky: ['#1a2038', '#5a6a96'], stars: true,  orb: '#dfe6f5', orbR: 11, far: '#3a4668', near: '#252d48', type: 'rocks',   ground: '#2d3652', line: '#6f7fa8', pal: { c: '#7d86a8', d: '#454c6e', a: '#d0e0ff' } },
+  { name: 'Туманные болота',  sky: ['#1a2420', '#4a5e50'], stars: false, orb: '#d8e0c0', orbR: 12, far: '#2f4238', near: '#1a2a22', type: 'pines',   ground: '#233629', line: '#5d8a62', pal: { c: '#6a8a3c', d: '#3c5220', a: '#b0e060' } },
+  { name: 'Снежные вершины',  sky: ['#1a2a4a', '#9ab8dc'], stars: true,  orb: '#ffffff', orbR: 12, far: '#6e87b0', near: '#4f668f', type: 'rocks',   ground: '#8ea6c8', line: '#e4eefa', pal: { c: '#a0c4e4', d: '#5e84ac', a: '#ffffff' } },
+  { name: 'Вулкан Пепла',     sky: ['#240d10', '#7a2a1e'], stars: false, orb: '#ffb060', orbR: 15, far: '#4a1c1a', near: '#2a0f10', type: 'rocks',   ground: '#331512', line: '#e0643a', pal: { c: '#8a2e22', d: '#4e140e', a: '#ffb347' } },
+  { name: 'Лунные руины',     sky: ['#120f2a', '#4a3a86'], stars: true,  orb: '#f3e9ff', orbR: 15, far: '#2a2352', near: '#171233', type: 'pillars', ground: '#201a44', line: '#8a76d6', pal: { c: '#7a5fc0', d: '#40307a', a: '#e0c8ff' } },
+];
+
+const ALLIES = [
+  { id: 'sora',  name: 'Наруто Узумаки', title: 'Будущий Хокагэ',       clan: 'Узумаки', style: 'Кагэ Буншин · Расэнган',        base: 50,      dps: 5,      pal: { c: '#e58a32', d: '#7d421e', a: '#e9e4d6' } },
+  { id: 'kaito', name: 'Тентен',         title: 'Мастер оружия',         clan: 'Коноха',  style: 'Свитки · кунаи · сюрикэны',      base: 250,     dps: 22,     pal: { c: '#8c4b45', d: '#4c2b31', a: '#d9b54a' } },
+  { id: 'ren',   name: 'Саске Учиха',    title: 'Последний мститель',    clan: 'Учиха',   style: 'Катон · Чидори · Шаринган',      base: 1250,    dps: 100,    pal: { c: '#262b42', d: '#171a2b', a: '#d8d9e6', e: '#e64b4b' } },
+  { id: 'mina',  name: 'Сакура Харуно',  title: 'Медик-ниндзя',          clan: 'Коноха',  style: 'Медицинское ниндзюцу · сила',   base: 6000,    dps: 440,    pal: { c: '#c66b91', d: '#733d5e', a: '#f2c4d0' } },
+  { id: 'akagi', name: 'Какаши Хатаке',  title: 'Копирующий ниндзя',      clan: 'Хатаке',  style: 'Шаринган · Райкири · Камуи',    base: 30000,   dps: 2000,   pal: { c: '#64718f', d: '#30384f', a: '#e2e5ee', e: '#e64b4b' } },
+  { id: 'yuki',  name: 'Хината Хьюга',   title: 'Наследница Бьякугана',   clan: 'Хьюга',   style: 'Бьякуган · Мягкий кулак',        base: 150000,  dps: 9000,   pal: { c: '#3d526d', d: '#26354d', a: '#dfe8f4', e: '#d9f4ff' } },
+  { id: 'gendo', name: 'Итачи Учиха',   title: 'Шиноби, несущий скорбь', clan: 'Учиха',   style: 'Цукуёми · Аматэрасу · Сусаноо', base: 800000,  dps: 42000,  pal: { c: '#3b2635', d: '#201923', a: '#c6b7bd', e: '#e64b4b' } },
+  { id: 'tenma', name: 'Шикамару Нара',  title: 'Гений теневых стратегий',clan: 'Нара',    style: 'Теневое подражание · тактика',   base: 4000000, dps: 200000, pal: { c: '#59634f', d: '#323a2f', a: '#c5c6b0' } },
+];
+
+const ALLY_PASSIVES = {
+  sora: [
+    { lvl: 10, text: 'Свиток запретных техник: личный урон +15%', own: .15, story: 'Наруто снова проваливает выпускной экзамен Академии. Мизуки обещает ему признание, но лишь использует его, чтобы добраться до Свитка печатей. Когда Ирука закрывает Наруто собой и называет его товарищем, тот впервые понимает: его не обязаны принимать все — достаточно тех, кто действительно видит в нём человека. В ответ Наруто осваивает Технику множественного теневого клонирования.' },
+    { lvl: 25, text: 'Командная связка: весь урон отряда +5%', global: .05, story: 'На Мосту Наруто сталкивается с Забузой и Хаку. Увидев, как Саске падает, он впервые теряет контроль над чакрой Девятихвостого. Но именно эта битва учит его: сила нужна не для того, чтобы затмить товарищей, а чтобы не дать им исчезнуть. Ты замечаешь, как он прикрывает твой отряд тем же отчаянным порывом.' },
+    { lvl: 50, text: 'Обещание вернуть друга: личный урон +25%', own: .25, story: 'После ухода Саске Наруто даёт Сакуре обещание вернуть его. Он проигрывает бой в Долине Завершения, но не отказывается от слова. В твоём отряде он узнаёт ту же решимость — и больше не пытается нести каждую ношу в одиночку. Теперь он сражается рядом с тобой, а не вместо всех.' },
+    { lvl: 100, text: 'Чакра Девятихвостого: весь урон отряда +10%', global: .10, story: 'Во время Четвёртой войны Наруто делится чакрой Курамы с союзными шиноби. Впервые его сила становится не личным оружием, а защитой для тысяч людей. Передавая чакру твоему отряду, он говорит, что настоящий Хокагэ не стоит впереди всех — он объединяет тех, кто готов идти рядом.' },
+  ],
+  kaito: [
+    { lvl: 10, text: 'Мастерство свитков: личный урон +20%', own: .20, story: 'Тентен тренируется с оружейными свитками до тех пор, пока каждый кунай не начинает ложиться точно в цель. На экзамене на звание чунина она выходит против Темари и впервые сталкивается с противником, чьи веера способны остановить целый залп. Поражение больно бьёт по самолюбию, но Тентен не бросает путь оружейника.' },
+    { lvl: 25, text: 'Арсенал команды Гая: урон клика +10%', click: .10, story: 'Наблюдая за тем, как Ли и Нэджи снова превосходят себя, Тентен понимает, что её место в команде не второстепенное. Она готовит для тебя запас кунаев, печатей и ловушек, превращая каждую секунду боя в возможность для точного удара.' },
+    { lvl: 50, text: 'Оружие Мудреца: личный урон +30%', own: .30, story: 'В Четвёртой войне Тентен находит одно из Сокровенных орудий Мудреца Шести Путей — веер Басёсэн. Его сила почти полностью опустошает её чакру. Ты помогаешь ей удержаться на ногах, а она впервые понимает, что легендарное оружие становится по-настоящему опасным только в руках того, кто умеет доверять товарищам.' },
+    { lvl: 100, text: 'Дождь тысячи клинков: урон клика +20%', click: .20, story: 'Когда поле боя заполняют белые маски Десятихвостого, Тентен больше не пытается доказать, что способна превзойти Нэджи или Ли. Она прикрывает твой отряд продуманным оружейным шквалом и принимает собственный стиль — не копию чужого мастерства, а искусство, которое спасает команду.' },
+  ],
+  ren: [
+    { lvl: 10, text: 'Пламя клана Учиха: личный урон +20%', own: .20, story: 'После ночи, когда Итачи уничтожил клан Учиха, Саске остался один с желанием отомстить. Воспоминания о семье становятся для него источником силы и одновременно цепью. Ты видишь, как он сжимает кулак, когда враг насмехается над именем Учиха: теперь он учится использовать гнев, не позволяя ему управлять каждым решением.' },
+    { lvl: 25, text: 'Чидори: урон техник +15%', skill: .15, story: 'Какаши обучает Саске Чидори перед экзаменом на чунина. Молния в его ладони напоминает ему, насколько он отстал от Итачи. В битве с Гаарой Саске впервые осознаёт, что одной мести недостаточно: ему нужна сила, чтобы защитить тех, кто оказался рядом. В твоём отряде этот урок становится ещё труднее — и важнее.' },
+    { lvl: 50, text: 'Проклятая печать: личный урон +35%', own: .35, story: 'Орочимару предлагает Саске силу, которая обещает приблизить его к мести. Саске покидает Коноху, разрывая связи с Наруто и Сакурой. Ты не оправдываешь его поступок, но видишь знакомую боль за холодным взглядом. Саске принимает помощь твоего отряда не как прощение прошлого, а как шанс самому выбрать следующий шаг.' },
+    { lvl: 100, text: 'Воля восстановленного Учиха: весь урон +10%', global: .10, story: 'В Четвёртой войне Саске узнаёт правду об Итачи, встречает возрождённого брата и сражается бок о бок с бывшими врагами. После финальной битвы с Наруто он перестаёт считать разрыв связей единственным путём. С тобой он заключает негласный союз: сила нужна не для одиночества, а для защиты выбранного пути.' },
+  ],
+  mina: [
+    { lvl: 10, text: 'Контроль чакры Цунаде: весь урон +5%', global: .05, story: 'Сакура понимает, что больше не может оставаться той, кого постоянно спасают Наруто и Саске. Под руководством Цунаде она учится тончайшему контролю чакры и медицинскому ниндзюцу. Первое её настоящее достижение — не удар, а спасённая жизнь. После боя она перевязывает твоих бойцов и просит не путать силу с жестокостью.' },
+    { lvl: 25, text: 'Медицинское ниндзюцу: восстановление чакры +1/с', chakra: 1, story: 'Во время спасения Гаары Сакура сталкивается с Сасори и впервые показывает, чему научилась у Пятой Хокагэ. Вместе с бабушкой Тиё она выдерживает бой против мастера марионеток и находит противоядие для Канкуро. В твоём отряде Сакура распределяет чакру так, чтобы каждый мог продолжать сражение.' },
+    { lvl: 50, text: 'Печать Сотни: весь урон +10%', global: .10, story: 'Сакура раскрывает печать Бякуго и выходит на поле боя рядом с Цунаде. За этой техникой стоят годы накопления чакры и дисциплины. Когда враг ранит твоих союзников, Сакура больше не колеблется: она одновременно удерживает их на грани жизни и наносит удар, от которого содрогается земля.' },
+    { lvl: 100, text: 'Наследница Пятой: урон по боссам +15%', boss: .15, story: 'В битве против Кагуи Сакура доказывает, что даже без древней кровной техники может изменить ход сражения. Её удар помогает остановить противника, которого не смогли одолеть одни лишь легендарные силы. После этого она обещает твоему отряду: никто не будет списан со счетов, пока она способна подняться.' },
+  ],
+  akagi: [
+    { lvl: 10, text: 'Шаринган Копирующего ниндзя: личный урон +20%', own: .20, story: 'Обито передаёт Какаши свой Шаринган в тот день, когда кажется, что команда навсегда потеряла друга. Какаши долго воспринимает этот глаз как напоминание о собственной неудаче. В бою рядом с тобой он снова вспоминает слова Обито: шиноби, которые бросают товарищей, хуже мусора. Эта мысль становится его первой пассивной защитой от отчаяния.' },
+    { lvl: 25, text: 'Тактика копирования: авто-клик +15%', auto: .15, story: 'На испытании с колокольчиками Какаши проверяет, способны ли Наруто, Саске и Сакура действовать как команда. Позже он переносит этот урок в твой отряд: копировать технику недостаточно, нужно понять момент, когда товарищу понадобится прикрытие. Его молниеносные контратаки задают ритм всему бою.' },
+    { lvl: 50, text: 'Наследие Обито: личный урон +35%', own: .35, story: 'Правда о человеке в маске заставляет Какаши вновь пережить гибель Рин и потерю Обито. Он видит, как ненависть искривила судьбу старого друга, и отказывается повторять этот путь. Когда враг пытается ударить по твоему отряду через прошлое Какаши, тот впервые отвечает без колебаний — но не из мести.' },
+    { lvl: 100, text: 'Совершенный Камуи: авто-клик +25%', auto: .25, story: 'В Четвёртой войне Какаши получает возможность использовать силу обоих Мангэкё и раскрывает Сусаноо вместе с Камуи. Он знает цену каждой секунды, пока его товарищи открывают путь к победе. В твоём отряде он становится тем, кто появляется именно тогда, когда один точный удар может решить исход битвы.' },
+  ],
+  yuki: [
+    { lvl: 10, text: 'Бьякуган: весь урон +5%', global: .05, story: 'Хината растёт под давлением клана Хьюга: её считают слишком мягкой для наследницы главной семьи. Она видит, как Нэджи превращает боль в презрение, и всё же не отвечает ему ненавистью. Наблюдая за твоим отрядом, Хината учится говорить о своей силе не шёпотом и больше не прячет глаза.' },
+    { lvl: 25, text: 'Мягкий кулак: шанс крита +5%', crit: .05, story: 'На экзамене на чунина Хината выходит против Нэджи, хотя понимает, насколько уступает ему в опыте. Слова Наруто помогают ей не отступить. Её точные удары по системе чакры противника становятся не доказательством превосходства, а заявлением: судьбу можно оспорить. Тебе она показывает тот же приём, когда враг оставляет малейшую брешь.' },
+    { lvl: 50, text: 'Стойкость наследницы: весь урон +10%', global: .10, story: 'Во время нападения Пэйна на Коноху Хината встаёт между ним и тяжело раненным Наруто. Она знает, что может проиграть, но всё равно бросается вперёд. После этого боя она признаётся тебе: страх не исчезает даже у храброго шиноби — важно лишь, кого он решает защитить.' },
+    { lvl: 100, text: 'Восемь триграмм: шанс крита +10%', crit: .10, story: 'В Четвёртой войне Хината продолжает сражаться после гибели Нэджи и помогает Наруто не потерять волю. Она больше не та робкая наследница, которая боялась собственного голоса. Когда твой отряд попадает в окружение, Хината раскрывает Бьякуган и прокладывает путь для каждого бойца.' },
+  ],
+  gendo: [
+    { lvl: 10, text: 'Наследие Итачи: личный урон +25%', own: .25, story: 'Итачи принимает на себя ненависть Саске, совершив поступок, который навсегда сделал его предателем в глазах брата и деревни. Воспоминание о последней встрече с родителями остаётся с ним тяжелее любого проклятия. В твоём отряде он впервые рассказывает о выборе, который нельзя оправдать, и превращает эту боль в безошибочную концентрацию.' },
+    { lvl: 25, text: 'Цукуёми: урон техник +20%', skill: .20, story: 'Итачи использует гендзюцу, чтобы сломить волю противника за мгновение. Но после встречи с тобой он не направляет эту силу на слабых ради устрашения. Когда враг пытается подчинить разум твоих союзников, Итачи разворачивает иллюзию против самого нападающего — и впервые применяет страшную технику ради защиты, а не наказания.' },
+    { lvl: 50, text: 'Аматэрасу: личный урон +40%', own: .40, story: 'Возрождённый Эдо Тэнсэй Итачи освобождается от контроля Кабуто и объединяется с Саске, чтобы остановить технику перерождения. Он знает, что его время рядом с братом ограничено. В битве с твоим врагом чёрное пламя вспыхивает не из ненависти, а из решимости закончить бой, пока у товарищей ещё есть шанс.' },
+    { lvl: 100, text: 'Сусаноо Ята: весь урон +15%', global: .15, story: 'Перед исчезновением Итачи оставляет Саске правду и право самому решить, каким человеком стать. В твоём мире он встречает ещё одного лидера, который не требует от него оправданий. На один цикл перерождения Итачи становится щитом твоего отряда — не ради искупления, а потому что теперь может сделать другой выбор.' },
+  ],
+  tenma: [
+    { lvl: 10, text: 'Теневое подражание: личный урон +25%', own: .25, story: 'Шикамару с детства считает многие вещи хлопотными, но быстро понимает, что его ленивый вид скрывает редкий стратегический ум. На экзамене на чунина он использует Теневое подражание, чтобы контролировать ход боя, а не просто наносить урон. Тебе он сразу предлагает не бросаться вперёд, пока не просчитан путь отступления.' },
+    { lvl: 25, text: 'Память об Асуме: урон по боссам +20%', boss: .20, story: 'После гибели Асумы от рук Хидана Шикамару долго молчит, а затем превращает скорбь в план. Он заманивает бессмертного врага в ловушку и завершает бой, используя собственную местность и терпение. Когда один из боссов угрожает твоим союзникам, Шикамару просит довериться его расчёту — он уже знает цену потере наставника.' },
+    { lvl: 50, text: 'Теневой захват: личный урон +45%', own: .45, story: 'В Четвёртой войне Шикамару берёт на себя роль связующего звена между отрядами и кланом Нара. Он понимает, что идеальный план не спасает всех, но хороший командир обязан подготовить шанс для каждого. С твоим отрядом он комбинирует теневую технику с атаками союзников, обездвиживая даже противников, превосходящих его силой.' },
+    { lvl: 100, text: 'Стратег Конохи: весь урон +20%', global: .20, story: 'После войны Шикамару становится одним из главных советников Хокагэ. Он всё ещё называет большие планы хлопотными, но больше не избегает ответственности. Перед решающим боем он раскладывает перед тобой карту и говорит, что даже самый сильный шиноби нуждается в команде. Теперь его стратегия усиливает каждого в твоём отряде.' },
+  ],
+};
+const ALLY_LORE = {
+  sora: 'Наруто Узумаки вырос в Конохе, не зная родителей и мечтая, чтобы деревня признала его. Его путь начался с дружбы с Ирукой, продолжился командой 7 и обещанием вернуть Саске. За шумным характером скрывается шиноби, который не бросает друзей и способен превратить одиночество в связь между целыми народами.',
+  kaito: 'Тентен — куноичи команды Гая и мастер оружия, способная мгновенно призывать из свитков десятки видов снаряжения. Её путь не связан с легендарной кровной техникой: она добивается мастерства тренировками, точностью и упорством. В Четвёртой войне ей довелось прикоснуться к Сокровенным орудиям Мудреца Шести Путей.',
+  ren: 'Саске Учиха пережил уничтожение клана и посвятил юность мести старшему брату Итачи. Он покинул Коноху ради силы Орочимару, прошёл путь через ненависть и узнал правду о судьбе своего клана. Его история — не простое искупление, а тяжёлый выбор между одиночеством и связями, которые он так долго отрицал.',
+  mina: 'Сакура Харуно начинала как ученица команды 7, но под руководством Цунаде стала одной из сильнейших медицинских куноичи своего поколения. Она владеет исключительным контролем чакры, чудовищной физической силой и печатью Бякуго. В бою с Сасори и во время Четвёртой войны Сакура доказала, что её сила спасает жизни и меняет исход сражений.',
+  akagi: 'Какаши Хатаке — Копирующий ниндзя Конохи, ученик Минато и наставник команды 7. Шаринган, подаренный Обито, стал для него памятью о друге и уроком о ценности товарищей. За холодной манерой скрывается человек, который пережил потери Рин и Обито, но сумел снова поверить в новое поколение.',
+  yuki: 'Хината Хьюга родилась в главной семье клана Хьюга и с детства испытывала давление из-за мягкого характера. Благодаря Наруто она научилась не отступать перед страхом и развила стиль Мягкого кулака. Её решимость особенно ярко проявилась во время нападения Пэйна и Четвёртой войны.',
+  gendo: 'Итачи Учиха был гением клана и шиноби АНБУ, который уничтожил клан по приказу, чтобы предотвратить переворот и большую войну, оставив жизнь младшему брату. Для мира он стал преступником и членом Акацуки; для Саске — источником ненависти и позднего прозрения. Его история — трагедия человека, который взвалил на себя непосильную цену мира.',
+  tenma: 'Шикамару Нара — гениальный стратег клана Нара, владеющий Теневым подражанием. Он пережил гибель наставника Асумы и сумел победить Хидана не грубой силой, а терпением и расчётом. Несмотря на постоянные жалобы на хлопоты, Шикамару всегда берёт ответственность, когда от этого зависит жизнь товарищей.',
+};
+
+const SKILLS = [
+  { id: 'fire',  name: 'Катон: Огненный шар',    kanji: '火', cost: 30, cd: 12, dur: 0,  desc: 'Взрыв: урон как за 20 секунд вашего DPS', unlock: 1 },
+  { id: 'clone', name: 'Теневое клонирование',    kanji: '影', cost: 25, cd: 25, dur: 15, desc: 'Ваши клики ×3 на 15 секунд', unlock: 1 },
+  { id: 'seal',  name: 'Печать сдерживания', kanji: '土', cost: 20, cd: 30, dur: 10, desc: '+15 с к таймеру босса и +50% урона на 10 секунд', unlock: 5 },
+  { id: 'focus', name: 'Тактика дзёнина',    kanji: '集', cost: 40, cd: 60, dur: 20, desc: 'Союзники бьют вдвое сильнее 20 секунд', unlock: 5 },
+  { id: 'rasengan', name: 'Расэнган', kanji: '螺', cost: 35, cd: 18, dur: 0, desc: 'Мощный удар: 12 секунд вашего DPS', unlock: 10 },
+  { id: 'chidori', name: 'Чидори', kanji: '千', cost: 30, cd: 22, dur: 8, desc: 'Авто-клики наносят двойной урон 8 секунд', unlock: 10 },
+  { id: 'water', name: 'Водяная тюрьма', kanji: '水', cost: 45, cd: 45, dur: 12, desc: 'Ослабляет босса: союзники наносят +50% урона 12 секунд', unlock: 15 },
+  { id: 'summon', name: 'Призыв Гамабунты', kanji: '召', cost: 50, cd: 55, dur: 15, desc: 'Призванный дух наносит урон 15 секунд', unlock: 20 },
+];
+
+const mile = (L) => (L >= 10 ? 2 : 1) * Math.pow(4, Math.floor(L / 25));
+const tapPower = (L) => (1 + L) * mile(L);
+
+const TAP = [
+  { id: 'power', name: 'Сила удара',    base: 10,  r: 1.10, max: Infinity, eff: (L) => 'Урон клика: ' + fmt(tapPower(L)) + ' → ' + fmt(tapPower(L + 1)) },
+  { id: 'combo', name: 'Серия ударов',  base: 150, r: 1.40, max: 20,       eff: (L) => 'Каждый 5-й удар ×' + fmt(3 + 0.5 * L) + (L < 20 ? ' → ×' + fmt(3 + 0.5 * (L + 1)) : '') },
+  { id: 'share', name: 'Чакра в ударе', base: 400, r: 1.35, max: 40,       eff: (L) => 'Клик добавляет ' + L + '% вашего DPS' + (L < 40 ? ' → ' + (L + 1) + '%' : '') },
+];
+
+const EYES = [
+  { id: 'insight',   name: 'Глаз Прозрения',   max: 10,       eff: (L) => 'Шанс удара по слабому месту: ' + (5 + 5 * L) + '%' + (L < 10 ? ' → ' + (10 + 5 * L) + '%' : '') + ' (урон ×5)' },
+  { id: 'foresight', name: 'Глаз Предвидения', max: 10,       eff: (L) => 'Время боя с боссом: ' + (30 + 3 * L) + ' с' + (L < 10 ? ' → ' + (33 + 3 * L) + ' с' : '') },
+  { id: 'mirror',    name: 'Глаз Зеркала',     max: Infinity, eff: (L) => 'Весь урон: +' + (15 * L) + '% → +' + (15 * (L + 1)) + '%' },
+];
+
+const NAMES = {
+  ninja: ['Шиноби Звука', 'Охотник из Киригакурэ', 'Ниндзя Песка', 'Дезертир Орочимару', 'Боец Корня АНБУ'],
+  wolf:  ['Нинкен-разведчик', 'Призванный волк', 'Зверь границы Страны Огня', 'Боевой пёс Конохи'],
+  wisp:  ['Марионетка Сунагакурэ', 'Иллюзия гендзюцу', 'Проклятая печать', 'След чужой чакры'],
+};
+const KIND_LBL = { ninja: 'Шиноби', wolf: 'Призывное животное', wisp: 'Техника / марионетка', oni: 'БОСС' };
+const BOSSES = ['Момочи Забуза', 'Хаку', 'Орочимару', 'Гаара', 'Дейдара', 'Сасори', 'Кисаме Хошигаки', 'Какузу'];
+
+// Легендарные противники появляются на каждой сотой зоне. После победы они
+// присоединяются к отряду в этой временной сюжетной линии до перерождения.
+const SPECIAL_BOSSES = [
+  { id: 'zabuza', name: 'Момочи Забуза', title: 'Демон Скрытого Тумана', style: 'Меч Кубикирибочо · скрытое убийство', hp: 2.2, attack: 'mist', passive: { boss: .05 }, passiveText: 'Туман смерти: урон по боссам +5%', pal: { c: '#587f8a', d: '#2d4a56', a: '#d1e1e7' }, story: 'Ты встретил Забузу там, где туман скрывал даже собственные следы. Он пришёл за твоей головой и был уверен, что страх заставит отряд разбежаться. Но ты не отступил и не бросил своих. После поражения Забуза признаёт в тебе командира, который понимает цену товарищам. Он остаётся рядом до твоего перерождения — не из дружбы, а из уважения к силе твоей воли.' },
+  { id: 'orochimaru', name: 'Орочимару', title: 'Легендарный саннин', style: 'Змеиные техники · запретные дзюцу', hp: 2.4, attack: 'drain', passive: { skill: .08 }, passiveText: 'Запретные исследования: урон техник +8%', pal: { c: '#c6c6b5', d: '#666b62', a: '#e6e5d6', e: '#d7df9a' }, story: 'Орочимару наблюдал за твоим отрядом как за очередным экспериментом. Он попытался подчинить твою волю и забрать секрет твоей силы, но просчитался: ты выдержал его змеиные техники и заставил отступить. Заинтригованный тем, что не смог объяснить, он предлагает сделку — его знания и техники в обмен на возможность наблюдать за твоим ростом до следующего перерождения.' },
+  { id: 'gaara', name: 'Гаара', title: 'Пятый Казэкагэ', style: 'Песчаный щит · Песчаное погребение', hp: 2.3, attack: 'guard', passive: { global: .05 }, passiveText: 'Песчаная защита: весь урон отряда +5%', pal: { c: '#a76f43', d: '#68452e', a: '#e4c59a' }, story: 'В этом столкновении Гаара ещё не знает, можно ли доверять тем, кто прибыл из другой деревни. Его песок пытается раздавить тебя, но ты продолжаешь защищать отряд, даже когда бой становится почти безнадёжным. В твоей решимости он узнаёт собственный путь от ненависти к защите. После поражения Гаара принимает временный союз и обещает прикрывать твой отряд до перерождения.' },
+  { id: 'deidara', name: 'Дейдара', title: 'Художник взрыва', style: 'Взрывная глина · C0', hp: 2.5, attack: 'blast', passive: { click: .08 }, passiveText: 'Искусство мгновения: урон клика +8%', pal: { c: '#d5c08c', d: '#8a744c', a: '#f4dfac' }, story: 'Дейдара считает твою команду скучной мишенью и превращает поле боя в выставку взрывного искусства. Ты выдерживаешь его ловушки и заставляешь художника признать, что противник, способный выстоять перед его C3, заслуживает внимания. Он вступает в отряд ради нового зрелища: хочет увидеть, какую форму примет сила, которую ты собираешь.' },
+  { id: 'konan', name: 'Конан', title: 'Ангел Амэгакурэ', style: 'Бумажное ниндзюцу · Взрывные печати', hp: 2.6, attack: 'paper', passive: { skill: .08 }, passiveText: 'Бумажный танец: урон техник +8%', pal: { c: '#7b91b8', d: '#3c4a6a', a: '#e0e6ef', e: '#dceaff' }, story: 'Ты встречаешь Конан под дождём Амэгакурэ. Она считает, что твой отряд станет ещё одной жертвой бесконечной войны, и атакует без предупреждения. Но даже под градом бумажных печатей ты возвращаешься за каждым товарищем. Конан узнаёт в этом верность мечте Яхико — миру, который не должен строиться на новых жертвах. После поражения она соглашается идти рядом с тобой до перерождения, чтобы увидеть, сможешь ли ты воплотить эту мечту.' },
+  { id: 'pain', name: 'Пэйн (Нагато)', title: 'Бог Шести Путей', style: 'Риннеган · Шесть Путей', hp: 2.8, attack: 'gravity', passive: { boss: .10 }, passiveText: 'Шесть Путей: урон по боссам +10%', pal: { c: '#a64f50', d: '#552a37', a: '#d7c6c2', e: '#c95b5b' }, story: 'Нагато уверен, что только пережитая боль заставляет мир понять цену войны. Он обрушивает на тебя силу Шести Путей, но ты продолжаешь поднимать союзников и не отвечаешь ненавистью на ненависть. После поражения Нагато впервые допускает, что твой отряд может стать доказательством другого пути. Он присоединяется к тебе, чтобы увидеть, сможет ли твоя воля изменить то, что не удалось ему.' },
+  { id: 'obito', name: 'Обито Учиха', title: 'Человек в маске', style: 'Камуи · пространство-время', hp: 3.0, attack: 'kamui', passive: { auto: .08 }, passiveText: 'Камуи: авто-клик наносит +8% урона', pal: { c: '#55433c', d: '#2d2528', a: '#c2b2a2', e: '#d85b52' }, story: 'Обито не верит в мир, где кто-то способен пережить потерю и всё же продолжить жить. Он пытается стереть твою команду из реальности при помощи Камуи, но ты возвращаешься за каждым товарищем. Это ломает его уверенность сильнее любого удара. Обито соглашается идти рядом с тобой до перерождения, чтобы проверить, действительно ли связь между людьми может оказаться сильнее иллюзии.' },
+  { id: 'madara', name: 'Мадара Учиха', title: 'Призрак эпохи', style: 'Вечный Мангэкё · Сусаноо', hp: 3.2, attack: 'meteor', passive: { global: .10 }, passiveText: 'Воля Учиха: весь урон отряда +10%', pal: { c: '#6e2934', d: '#351923', a: '#d2b4a0', e: '#e75b55' }, story: 'Мадара выходит против тебя так, словно весь мир — его личное поле боя. Он презирает надежду на союз и проверяет отряд ударами, которые должны были бы стереть целую армию. Но ты не позволяешь ему превратить товарищей в расходный материал. После поражения Мадара признаёт твою стойкость и временно принимает место в отряде — скорее как опасный союзник, чем подчинённый.' },
+  { id: 'kaguya', name: 'Кагуя Ооцуцуки', title: 'Прародительница чакры', style: 'Пространства измерений · кости пепла', hp: 3.5, attack: 'dimension', passive: { chakra: 1 }, passiveText: 'Чакра прародительницы: восстановление чакры +1/с', pal: { c: '#e4d9e8', d: '#8c7b9d', a: '#f8f4ff', e: '#b9e8f5' }, story: 'Кагуя переносит бой между измерениями, уверенная, что человеческая воля не способна противостоять её силе. Ты собираешь отряд после каждого разрыва пространства и продолжаешь искать способ защитить товарищей. Впервые за долгое время Кагуя встречает не поклонение и не страх, а сопротивление, основанное на доверии. Она остаётся рядом до перерождения, и даже этот союз похож на хрупкое перемирие.' },
+  { id: 'kisame', name: 'Кисаме Хошигаки', title: 'Хвостатый без хвоста', style: 'Самехада · водные техники', hp: 2.9, attack: 'drain', passive: { skill: .08 }, passiveText: 'Самехада: урон техник +8%', pal: { c: '#477f9a', d: '#24485d', a: '#d4e4e9' }, story: 'Кисаме пытается поглотить чакру твоего отряда Самехадой, но ты меняешь тактику и не даёшь ему подпитать клинок. Он привык видеть в мире только ложь и приказы, однако твоя команда сражается, не скрывая, ради кого каждый готов рискнуть. Из любопытства к такой связи Кисаме принимает временное место в твоём отряде.' },
+  { id: 'sasori', name: 'Сасори', title: 'Красный песок', style: 'Марионетки · яды', hp: 2.7, attack: 'guard', passive: { click: .08 }, passiveText: 'Мастер марионеток: урон клика +8%', pal: { c: '#a94f4e', d: '#572b31', a: '#d8b7a7' }, story: 'Сасори считает живые связи слабостью и превращает поле боя в сцену для своих марионеток. Ты побеждаешь его не только силой: твои товарищи снова и снова вытаскивают друг друга из ловушек. Он не признаёт поражение вслух, но соглашается идти рядом, чтобы понять, почему ты дорожишь тем, что он давно пытался заменить вечными куклами.' },
+  { id: 'hidan', name: 'Хидан', title: 'Бессмертный фанатик', style: 'Ритуал Джашина · коса', hp: 2.6, attack: 'mist', passive: { boss: .05 }, passiveText: 'Ритуальная метка: урон по боссам +5%', pal: { c: '#b6b7c3', d: '#57596d', a: '#d8d8e0' }, story: 'Хидан смеётся над твоими попытками остановить его: он верит, что бессмертие делает его непобедимым. Но ты не вступаешь в его ритуал и заставляешь его играть по правилам твоего поля боя. Поражение не делает его добрым — он остаётся опасным союзником под твоим присмотром, пока цикл не закончится.' },
+];
+
+const HERO_PAL = { c: '#2f3f86', d: '#1b2352', a: '#cfd8ee', e: '#ffffff' };
+
+/* ================= helpers ================= */
+const $ = (s, r) => (r || document).querySelector(s);
+const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+const rnd = (a, b) => a + Math.random() * (b - a);
+
+const SUF = ['', 'K', 'M', 'B', 'T', 'Qa', 'Qi', 'Sx', 'Sp', 'Oc', 'No', 'Dc'];
+function fmt(n) {
+  if (!isFinite(n)) return '∞';
+  if (n < 0) return '-' + fmt(-n);
+  if (n < 1000) {
+    if (n < 10 && Math.abs(n - Math.round(n)) > 1e-9) return (Math.round(n * 10) / 10).toString().replace('.', ',');
+    return String(Math.floor(n + 1e-9));
+  }
+  const e = Math.floor(Math.log10(n) / 3);
+  if (e >= SUF.length) { const x = Math.floor(Math.log10(n)); return (n / Math.pow(10, x)).toFixed(2).replace('.', ',') + 'e' + x; }
+  const v = n / Math.pow(1000, e);
+  return (v < 10 ? v.toFixed(2) : v < 100 ? v.toFixed(1) : v.toFixed(0)).replace('.', ',') + ' ' + SUF[e];
+}
+function setText(el, s) { if (el._t !== s) { el.textContent = s; el._t = s; } }
+function setCls(el, c, on) { if (el._c === undefined) el._c = {}; if (el._c[c] !== on) { el.classList.toggle(c, on); el._c[c] = on; } }
+function rng(seed) { let s = (seed >>> 0) || 1; return () => (s = (s * 1664525 + 1013904223) >>> 0) / 4294967296; }
+function hex(c) { const n = parseInt(c.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
+function mix(a, b, t) { const A = hex(a), B = hex(b); return 'rgb(' + A.map((v, i) => Math.round(v + (B[i] - v) * t)).join(',') + ')'; }
+
+/* ================= state ================= */
+function newState(starter) {
+  return { v: 2, gold: starter ? 50 : 0, zone: 1, kills: 0, maxZone: 1, bestEver: 1, auto: true, autoClick: true, godMode: false, godGoldBackup: null, trialClaims: [],
+    allies: ALLIES.map(() => 0), recruitedBosses: [], claimedBossZones: [], tap: { power: 0, combo: 0, share: 0 }, eye: { insight: 0, foresight: 0, mirror: 0 },
+    points: 0, rebirths: 0, chakra: 100, seen: false, savedAt: Date.now() };
+}
+let S = newState(true);
+const R = { enemy: null, combo: 0, cd: { fire: 0, clone: 0, seal: 0, focus: 0, rasengan: 0, chidori: 0, water: 0, summon: 0 }, buff: { clone: 0, seal: 0, focus: 0, chidori: 0, water: 0, summon: 0 },
+  acc: 0, accT: 0, debuff: {}, shake: 0, lunge: 0, fx: [], parts: [], buyMode: '1', tab: 'allies', modalAlly: -1, modalBoss: -1, modalBossSig: '', modalLevel: -1, bossRosterSig: '', bgIdx: -1, bg: null, t: 0, uiT: 0, saveT: 0 };
+
+function save() { try { S.savedAt = Date.now(); localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+function load() {
+  try {
+    const raw = localStorage.getItem(KEY); if (!raw) return false;
+    const o = JSON.parse(raw), d = newState(false);
+    S = Object.assign(d, o);
+    S.tap = Object.assign(d.tap, o.tap || {});
+    S.eye = Object.assign(d.eye, o.eye || {});
+    S.allies = ALLIES.map((_, i) => Math.max(0, +(o.allies && o.allies[i]) || 0));
+    const bossIds = new Set(SPECIAL_BOSSES.map((b) => b.id));
+    S.recruitedBosses = Array.isArray(o.recruitedBosses) ? o.recruitedBosses.filter((b) => b && bossIds.has(b.id) && Number.isFinite(+b.zone) && Number.isFinite(+b.dps)).map((b) => ({ id: b.id, zone: Math.max(100, +b.zone | 0), dps: Math.max(0, +b.dps) })) : [];
+    S.claimedBossZones = Array.isArray(o.claimedBossZones) ? o.claimedBossZones.map((z) => +z).filter((z) => Number.isFinite(z) && z >= 100 && z % 100 === 0) : [];
+    S.recruitedBosses.forEach((b) => { if (!S.claimedBossZones.includes(b.zone)) S.claimedBossZones.push(b.zone); });
+    ['gold', 'zone', 'kills', 'maxZone', 'bestEver', 'points', 'rebirths', 'chakra'].forEach((k) => { if (!isFinite(S[k])) S[k] = d[k]; });
+    S.zone = Math.max(1, S.zone | 0);
+    if (typeof S.autoClick !== 'boolean') S.autoClick = true;
+    if (typeof S.godMode !== 'boolean') S.godMode = false;
+    if (S.godMode) {
+      // Совместимость со старыми сохранениями, где режим бога ещё не имел бесконечных денег.
+      if (!Number.isFinite(S.godGoldBackup) || S.godGoldBackup < 0) S.godGoldBackup = Math.max(0, Number.isFinite(S.gold) ? S.gold : 0);
+      S.gold = Number.MAX_SAFE_INTEGER;
+    } else { S.godGoldBackup = null; }
+    if (!Array.isArray(S.trialClaims)) S.trialClaims = [];
+    return true;
+  } catch (e) { return false; }
+}
+
+/* ================= formulas ================= */
+function clanMult(i) {
+  const c = ALLIES[i].clan;
+  const n = ALLIES.filter((a, j) => a.clan === c && S.allies[j] > 0).length;
+  return n >= 3 ? 1.5 : n === 2 ? 1.25 : 1;
+}
+function passiveTotals() {
+  const t = { global: 0, click: 0, auto: 0, skill: 0, chakra: 0, crit: 0, boss: 0 };
+  ALLIES.forEach((a, i) => (ALLY_PASSIVES[a.id] || []).forEach((p) => { if (S.allies[i] >= p.lvl) Object.keys(t).forEach((k) => { if (p[k]) t[k] += p[k]; }); }));
+  (S.recruitedBosses || []).forEach((entry) => { const b = SPECIAL_BOSSES.find((x) => x.id === entry.id); if (b && b.passive) Object.keys(t).forEach((k) => { if (b.passive[k]) t[k] += b.passive[k]; }); });
+  return t;
+}
+function ownPassiveMult(i) {
+  const a = ALLIES[i]; let m = 1;
+  (ALLY_PASSIVES[a.id] || []).forEach((p) => { if (p.own && S.allies[i] >= p.lvl) m += p.own; });
+  return m;
+}
+function allyDpsOf(i) { const L = S.allies[i]; return L > 0 ? ALLIES[i].dps * L * mile(L) * clanMult(i) * ownPassiveMult(i) : 0; }
+function allyDpsBase() { let s = 0; for (let i = 0; i < ALLIES.length; i++) s += allyDpsOf(i); (S.recruitedBosses || []).forEach((b) => { s += Math.max(0, +b.dps || 0); }); return s; }
+function dmgMult() { const p = passiveTotals(); return (S.godMode ? 1000000000 : 1) * (1 + 0.15 * S.eye.mirror) * (1 + p.global) * (1 + 0.05 * S.trialClaims.length) * (R.buff.seal > 0 ? 1.5 : 1) * (R.debuff && R.debuff.guard > 0 ? .75 : 1) * (R.enemy && R.enemy.boss ? 1 + p.boss : 1); }
+function dps() { return allyDpsBase() * (R.buff.focus > 0 ? 2 : 1) * dmgMult(); }
+function clickBase() { const p = passiveTotals(); return (tapPower(S.tap.power) + allyDpsBase() * 0.01 * S.tap.share) * (1 + p.click); }
+function clickExpected() { return clickBase() * dmgMult() * (R.buff.clone > 0 ? 3 : 1); }
+function critChance() { return Math.min(0.75, 0.05 + 0.05 * S.eye.insight + passiveTotals().crit); }
+function bossTime() { return 30 + 3 * S.eye.foresight; }
+function pointsGain() { return S.maxZone >= 25 ? Math.floor((S.maxZone - 20) / 5) : 0; }
+function rankOf(L) { return L < 1 ? 'не нанят' : L < 10 ? 'Ученик' : L < 25 ? 'Генин' : L < 50 ? 'Чунин' : L < 100 ? 'Джонин' : 'Мастер'; }
+function nextMile(L) { return L < 10 ? { lvl: 10, mult: 2 } : { lvl: (Math.floor(L / 25) + 1) * 25, mult: 4 }; }
+
+function costN(base, r, L, n) { return base * Math.pow(r, L) * (Math.pow(r, n) - 1) / (r - 1); }
+function maxN(base, r, L, gold, cap) {
+  const first = base * Math.pow(r, L);
+  if (gold < first) return 0;
+  let n = Math.floor(Math.log(1 + gold * (r - 1) / first) / Math.log(r));
+  n = Math.min(n, cap);
+  while (n > 0 && costN(base, r, L, n) > gold) n--;
+  return n;
+}
+function planBuy(base, r, L, max) {
+  const cap = max - L;
+  if (cap <= 0) return { n: 0, cost: 0, capped: true, afford: false };
+  let n;
+  if (R.buyMode === 'max') {
+    n = maxN(base, r, L, S.gold, cap);
+    if (n < 1) return { n: 1, cost: costN(base, r, L, 1), afford: S.godMode };
+  } else n = Math.min(+R.buyMode, cap);
+  const cost = costN(base, r, L, n);
+  return { n, cost, afford: S.godMode || S.gold >= cost };
+}
+
+/* ================= sprites ================= */
+const SKIN = '#e3b48a', EYE = '#fff4c2', WHITE = '#f2efe6', OUT = '#0a0a14';
+const DRAW = {
+  ninja(R_, p) {
+    R_(5, 1, 6, 5, p.c); R_(5, 2, 6, 1, p.a); R_(6, 3, 4, 2, SKIN);
+    R_(6, 3, 1, 1, p.e || EYE); R_(9, 3, 1, 1, p.e || EYE); R_(6, 5, 4, 1, p.d);
+    R_(5, 6, 6, 4, p.c); R_(5, 8, 6, 1, p.a);
+    R_(3, 6, 2, 4, p.c); R_(11, 6, 2, 4, p.c); R_(3, 10, 2, 1, SKIN); R_(11, 10, 2, 1, SKIN);
+    R_(5, 10, 2, 4, p.d); R_(9, 10, 2, 4, p.d); R_(4, 14, 3, 1, p.c); R_(9, 14, 3, 1, p.c);
+  },
+  wolf(R_, p) {
+    R_(2, 5, 2, 2, p.c); R_(1, 4, 1, 1, p.c);
+    R_(3, 6, 8, 4, p.c); R_(4, 9, 6, 1, p.d); R_(4, 6, 6, 1, p.a);
+    R_(10, 4, 4, 4, p.c); R_(13, 6, 2, 2, p.c); R_(14, 7, 1, 1, p.d);
+    R_(10, 2, 1, 2, p.c); R_(12, 2, 1, 2, p.c); R_(12, 5, 1, 1, p.e || EYE); R_(13, 8, 1, 1, WHITE);
+    R_(3, 10, 2, 4, p.d); R_(5, 10, 2, 3, p.d); R_(8, 10, 2, 4, p.d); R_(10, 10, 2, 3, p.d);
+  },
+  wisp(R_, p) {
+    const rows = [[2, 1], [3, 2], [4, 2], [5, 3], [6, 4], [7, 4], [8, 5], [9, 5], [10, 5], [11, 4], [12, 3], [13, 2]];
+    rows.forEach(([y, h]) => R_(8 - h, y, h * 2, 1, p.c));
+    rows.forEach(([y, h]) => { if (y >= 7 && h >= 3) R_(8 - (h - 2), y, (h - 2) * 2, 1, p.a); });
+    R_(6, 8, 1, 2, p.e || EYE); R_(9, 8, 1, 2, p.e || EYE); R_(7, 11, 2, 1, p.d);
+  },
+  oni(R_, p) {
+    R_(4, 0, 1, 2, WHITE); R_(11, 0, 1, 2, WHITE);
+    R_(5, 1, 6, 4, p.c); R_(5, 2, 6, 1, p.d); R_(6, 3, 1, 1, EYE); R_(9, 3, 1, 1, EYE); R_(6, 5, 1, 1, WHITE); R_(9, 5, 1, 1, WHITE);
+    R_(3, 5, 10, 5, p.c); R_(3, 8, 10, 1, p.a); R_(7, 6, 2, 2, p.a);
+    R_(1, 5, 2, 5, p.c); R_(13, 5, 1, 5, p.c);
+    R_(14, 2, 1, 8, p.d); R_(13, 1, 2, 3, p.d);
+    R_(4, 10, 3, 4, p.d); R_(9, 10, 3, 4, p.d); R_(3, 14, 4, 1, p.c); R_(9, 14, 4, 1, p.c);
+  },
+};
+function paintSprite(kind, pal) {
+  const cv = document.createElement('canvas'); cv.width = 16; cv.height = 16;
+  const g = cv.getContext('2d');
+  DRAW[kind]((x, y, w, h, c) => { g.fillStyle = c; g.fillRect(x, y, w, h); }, pal);
+  const d = g.getImageData(0, 0, 16, 16).data;
+  const solid = (x, y) => x >= 0 && y >= 0 && x < 16 && y < 16 && d[(y * 16 + x) * 4 + 3] > 0;
+  g.fillStyle = OUT;
+  for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) {
+    if (!solid(x, y) && (solid(x + 1, y) || solid(x - 1, y) || solid(x, y + 1) || solid(x, y - 1))) g.fillRect(x, y, 1, 1);
+  }
+  return cv;
+}
+const spriteCache = new Map();
+function sprite(kind, key, pal) {
+  const k = kind + '|' + key;
+  let c = spriteCache.get(k);
+  if (c) return c;
+  c = paintSprite(kind, pal);
+  spriteCache.set(k, c);
+  return c;
+}
+
+/* ================= backgrounds ================= */
+function disc(g, cx, cy, rad, col) {
+  g.fillStyle = col;
+  for (let dy = -rad; dy <= rad; dy++) { const half = Math.floor(Math.sqrt(rad * rad - dy * dy)); g.fillRect(cx - half, cy + dy, half * 2 + 1, 1); }
+}
+const NEAR = {
+  pines(g, r) { for (let x = -6; x < W; x += 12 + ((r() * 14) | 0)) { const h = 36 + ((r() * 34) | 0); for (let i = 0; i < h; i += 2) { const w = 2 + Math.round(i / h * 14); g.fillRect(x - (w >> 1), GROUND - h + i, w, 2); } g.fillRect(x - 1, GROUND - 4, 2, 4); } },
+  bamboo(g, r, b) { for (let x = 4; x < W; x += 9 + ((r() * 9) | 0)) { const h = 70 + ((r() * 70) | 0); g.fillStyle = b.near; g.fillRect(x, GROUND - h, 3, h); g.fillRect(x + 3, GROUND - h + 6 + ((r() * 20) | 0), 6, 2); g.fillStyle = b.far; for (let y = GROUND - h + 10; y < GROUND; y += 16) g.fillRect(x - 1, y, 5, 1); } g.fillStyle = b.near; },
+  rocks(g, r) { for (let x = -10; x < W; x += 34 + ((r() * 30) | 0)) { const w = 44 + ((r() * 30) | 0), h = 26 + ((r() * 28) | 0); for (let c = 0; c < w; c++) { const t = 1 - Math.abs(2 * c / w - 1); const hh = Math.round(h * Math.pow(t, 0.7) + ((r() * 3) | 0)); g.fillRect(x + c, GROUND - hh, 1, hh); } } },
+  dunes(g, r) { const p = r() * 6; for (let x = 0; x < W; x++) { const y = Math.round(GROUND - 22 - Math.sin(x * 0.021 + p) * 11 - Math.sin(x * 0.055 + p * 2) * 5); g.fillRect(x, y, 1, GROUND - y); } },
+  pillars(g, r) { for (let x = 12; x < W; x += 34 + ((r() * 28) | 0)) { const h = 44 + ((r() * 60) | 0); g.fillRect(x, GROUND - h, 9, h); g.fillRect(x - 2, GROUND - h - 3, 13, 3); g.fillRect(x - 2, GROUND - 3, 13, 3); } },
+};
+function paintBG(b, seed) {
+  const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const g = cv.getContext('2d'), r = rng(seed);
+  const bands = 10, bh = Math.ceil(GROUND / bands);
+  for (let i = 0; i < bands; i++) { g.fillStyle = mix(b.sky[0], b.sky[1], i / (bands - 1)); g.fillRect(0, i * bh, W, bh + 1); }
+  if (b.stars) for (let i = 0; i < 46; i++) { g.fillStyle = 'rgba(255,255,255,' + (0.35 + r() * 0.55).toFixed(2) + ')'; g.fillRect((r() * W) | 0, (r() * 70) | 0, 1, 1); }
+  disc(g, 252, 36, b.orbR, b.orb);
+  const p1 = r() * 6, p2 = r() * 6;
+  g.fillStyle = b.far;
+  for (let x = 0; x < W; x++) { const y = Math.round(GROUND - 48 - (Math.sin(x * 0.027 + p1) * 14 + Math.sin(x * 0.071 + p2) * 7 + 10)); g.fillRect(x, y, 1, GROUND - y); }
+  g.fillStyle = b.near;
+  NEAR[b.type](g, r, b);
+  g.fillStyle = b.ground; g.fillRect(0, GROUND, W, H - GROUND);
+  g.fillStyle = b.line; g.fillRect(0, GROUND, W, 2);
+  for (let i = 0; i < 48; i++) { g.fillStyle = r() < 0.5 ? 'rgba(255,255,255,.08)' : 'rgba(0,0,0,.18)'; g.fillRect((r() * W) | 0, GROUND + 4 + ((r() * (H - GROUND - 6)) | 0), 2 + ((r() * 4) | 0), 1); }
+  return cv;
+}
+const biomeIdx = () => Math.floor((S.zone - 1) / 10) % BIOMES.length;
+
+/* ================= enemies & zones ================= */
+function goZone(z) {
+  S.zone = Math.max(1, z); S.kills = 0;
+  if (S.zone > S.maxZone) S.maxZone = S.zone;
+  if (S.zone > S.bestEver) S.bestEver = S.zone;
+}
+function makeEnemy() {
+  const z = S.zone, boss = z % 5 === 0, specialBoss = boss && z % 100 === 0;
+  const specialBossIndex = specialBoss ? Math.floor(z / 100 - 1) % SPECIAL_BOSSES.length : -1;
+  const special = specialBoss ? SPECIAL_BOSSES[specialBossIndex] : null;
+  const base = 10 * Math.pow(HP_G, z - 1);
+  const kinds = ['ninja', 'wolf', 'wisp'];
+  const kind = boss ? 'oni' : kinds[(Math.random() * 3) | 0];
+  const name = special ? special.name : boss ? BOSSES[(z / 5 - 1) % BOSSES.length] : NAMES[kind][(Math.random() * NAMES[kind].length) | 0];
+  const hp = boss ? base * BOSS_HP * (special ? special.hp : 1) : base;
+  const t = boss ? bossTime() + (special ? 30 : 0) : 0;
+  return { kind, boss, specialBoss, specialBossIndex, name, zone: z, hp, max: hp, gold: Math.ceil(hp * GOLD_R), timer: t, maxTimer: t, dying: 0, phase: Math.random() * 6, phaseStep: 0, bossIndex: boss ? Math.floor(z / 5 - 1) % BOSSES.length : -1, attackT: 8 };
+}
+function spawn() { R.enemy = makeEnemy(); }
+function enemyGeom() {
+  const e = R.enemy, boss = !!(e && e.boss), size = e && e.specialBoss ? 138 : boss ? 128 : 96, x = e && e.specialBoss ? 164 : boss ? 172 : 190;
+  return { size, x, cx: x + size / 2, cy: GROUND - size / 2 };
+}
+function kill() {
+  const e = R.enemy; if (!e || e.dying) return;
+  e.dying = 0.0001; e.hp = 0;
+  const gain = Math.ceil(e.gold);
+  if (!S.godMode) S.gold += gain;
+  const c = enemyGeom();
+  if (!S.godMode) floatText('+' + fmt(gain) + ' Рё', 'gold', c.cx, c.cy - 20);
+  burst(c.cx, c.cy, e.boss ? 30 : 14, ['#e8b64c', '#fff4c2', '#ffffff']);
+  if (e.specialBoss) recruitSpecialBoss(e);
+  if (e.boss) { toast((e.specialBoss ? 'Легендарный босс повержён: ' : 'Босс повержён: ') + e.name); goZone(S.zone + 1); }
+  else { S.kills++; if (S.kills >= ZONE_KILLS && S.auto) goZone(S.zone + 1); }
+}
+function recruitSpecialBoss(e) {
+  const zone = e.zone || S.zone;
+  if (S.claimedBossZones.includes(zone)) { toast(e.name + ' уже присоединялся в этом цикле.'); return; }
+  const data = SPECIAL_BOSSES[e.specialBossIndex]; if (!data) return;
+  const companionDps = Math.max(allyDpsBase() * 0.35, e.max * 0.002);
+  S.recruitedBosses.push({ id: data.id, zone, dps: companionDps });
+  S.claimedBossZones.push(zone); R.bossRosterSig = '';
+  toast(data.name + ' признал твою силу и вступил в отряд до перерождения!');
+  save();
+}
+function bossFail() {
+  const e = R.enemy;
+  toast((e.specialBoss ? 'Легендарный противник ' : 'Босс ') + '«' + e.name + '» одолел тебя. Прокачайся и вернись.');
+  goZone(S.zone - 1); S.auto = false; spawn();
+}
+function canForward() { return S.zone < S.maxZone || S.kills >= ZONE_KILLS; }
+
+/* ================= damage & effects ================= */
+function floatText(txt, cls, lx, ly) {
+  const fx = $('#fx');
+  while (fx.childElementCount > 36) fx.removeChild(fx.firstChild);
+  const s = document.createElement('span');
+  s.className = 'dmg ' + cls; s.textContent = txt;
+  s.style.left = (lx / W * 100) + '%'; s.style.top = (ly / H * 100) + '%';
+  fx.appendChild(s);
+  setTimeout(() => s.remove(), 1000);
+}
+function burst(x, y, n, cols) {
+  for (let i = 0; i < n; i++) {
+    const a = Math.random() * Math.PI * 2, sp = 40 + Math.random() * 90;
+    R.parts.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 40, life: 0.35 + Math.random() * 0.3, col: cols[(Math.random() * cols.length) | 0] });
+  }
+  if (R.parts.length > 150) R.parts.splice(0, R.parts.length - 150);
+}
+function hurt(amount, cls, x, y) {
+  const e = R.enemy; if (!e || e.dying) return;
+  e.hp -= amount;
+  floatText(fmt(amount), cls, x, y);
+  if (e.hp <= 0) kill();
+}
+function clickAt(lx, ly, isAuto) {
+  const e = R.enemy; if (!e || e.dying) return;
+  if (!S.seen) { S.seen = true; $('#hint').classList.add('off'); }
+  R.combo++;
+  let mult = 1, cls = '';
+  if (R.combo >= 5) { R.combo = 0; mult *= 3 + 0.5 * S.tap.combo; cls = 'combo'; }
+  if (Math.random() < critChance()) { mult *= CRIT_MULT; cls = 'crit'; }
+  const pass = passiveTotals();
+  const d = clickBase() * mult * (R.buff.clone > 0 ? 3 : 1) * dmgMult() * (isAuto && R.buff.chidori > 0 ? 2 : 1) * (isAuto ? 1 + pass.auto : 1) * (R.debuff && R.debuff.click > 0 ? .7 : 1);
+  if (!REDUCE && !isAuto) { R.lunge = 1; R.shake = 0.6; }
+  if (!isAuto) R.fx.push({ type: 'slash', t: 0, life: 0.2, x: lx, y: ly, dir: Math.random() < 0.5 ? 1 : -1, big: cls !== '' });
+  burst(lx, ly, cls ? 10 : (isAuto ? 2 : 5), cls === 'crit' ? ['#e2503c', '#ffd0c8', '#fff'] : ['#5fc9ee', '#ffffff']);
+  hurt(d, isAuto ? 'auto' : cls, lx + rnd(-8, 8), ly - 10);
+}
+function useSkill(id) {
+  const def = SKILLS.find((s) => s.id === id); if (!def) return;
+  if (S.bestEver < def.unlock || R.cd[id] > 0 || S.chakra < def.cost) return;
+  S.chakra -= def.cost; R.cd[id] = def.cd;
+  const c = enemyGeom();
+  if (id === 'fire') {
+    const dmg = Math.max(20 * dps(), 40 * clickBase() * dmgMult()) * (1 + passiveTotals().skill);
+    R.fx.push({ type: 'fire', t: 0, life: 0.6, x: c.cx, y: c.cy });
+    if (!REDUCE) R.shake = 1;
+    hurt(dmg, 'burst', c.cx, c.cy - 24);
+  } else if (id === 'clone') { R.buff.clone = def.dur; }
+  else if (id === 'seal') {
+    R.buff.seal = def.dur;
+    if (R.enemy && R.enemy.boss && !R.enemy.dying) { R.enemy.timer += 15; R.enemy.maxTimer = Math.max(R.enemy.maxTimer, R.enemy.timer); }
+  } else if (id === 'focus') { R.buff.focus = def.dur; }
+  else if (id === 'rasengan') {
+    const dmg = Math.max(12 * dps(), 25 * clickBase() * dmgMult()) * (1 + passiveTotals().skill);
+    R.fx.push({ type: 'fire', t: 0, life: 0.6, x: c.cx, y: c.cy });
+    hurt(dmg, 'burst', c.cx, c.cy - 24);
+  } else if (id === 'chidori') { R.buff.chidori = def.dur; }
+  else if (id === 'water') { R.buff.water = def.dur; }
+  else if (id === 'summon') { R.buff.summon = def.dur; }
+  updateUI();
+}
+
+/* ================= game loop ================= */
+function tick(dt) {
+  R.t += dt;
+  S.chakra = Math.min(100, S.chakra + (2 + passiveTotals().chakra) * dt);
+  if (R.debuff) Object.keys(R.debuff).forEach((k) => { R.debuff[k] = Math.max(0, R.debuff[k] - dt); });
+  // Авто-клик: 10 ударов в секунду, если режим авто включён.
+  if (S.autoClick && R.enemy && !R.enemy.dying) {
+    R.autoAcc = (R.autoAcc || 0) + dt * 10;
+    const n = Math.min(30, Math.floor(R.autoAcc));
+    if (n > 0) {
+      R.autoAcc -= n;
+      for (let j = 0; j < n; j++) {
+        const e = R.enemy;
+        if (!e || e.dying) break;
+        const g = enemyGeom();
+        clickAt(g.cx + rnd(-8, 8), g.cy - 8, true);
+      }
+    }
+  }
+  for (const k in R.cd) if (R.cd[k] > 0) R.cd[k] = Math.max(0, R.cd[k] - dt);
+  for (const k in R.buff) if (R.buff[k] > 0) R.buff[k] = Math.max(0, R.buff[k] - dt);
+  R.lunge = Math.max(0, R.lunge - dt * 7);
+  R.shake = Math.max(0, R.shake - dt * 8);
+  const e = R.enemy;
+  if (e) {
+    if (e.dying) { e.dying += dt; if (e.dying >= 0.35) spawn(); }
+    else {
+      const p = passiveTotals();
+      const d = dps() * (R.buff.water > 0 ? 1.5 : 1) * (R.debuff && R.debuff.allies > 0 ? .7 : 1) + (R.buff.summon > 0 ? 8 * clickBase() : 0);
+      if (d > 0) {
+        const dmg = d * dt; e.hp -= dmg; R.acc += dmg; R.accT += dt;
+        if (R.accT >= 0.6) {
+          const c = enemyGeom();
+          if (!e.dying && R.acc > 0) floatText(fmt(R.acc), 'ally', c.cx + rnd(-26, 26), c.cy - 34 + rnd(-8, 8));
+          R.acc = 0; R.accT = 0;
+        }
+        if (e.hp <= 0) kill();
+      }
+      if (e.boss && !e.dying && !S.godMode) {
+        e.timer -= dt;
+        const ratio = e.hp / e.max;
+        const phaseTarget = e.phaseStep === 0 ? .66 : e.phaseStep === 1 ? .33 : -1;
+        if (phaseTarget > 0 && ratio <= phaseTarget) {
+          e.phaseStep++;
+          const phaseNames = ['первая печать разрушена', 'входит в последнюю фазу'];
+          toast(e.name + ': ' + phaseNames[e.phaseStep - 1] + '!');
+          if (e.phaseStep === 2) e.attackT = Math.min(e.attackT, 3);
+        }
+        e.attackT -= dt;
+        if (e.attackT <= 0) {
+          e.attackT = e.phaseStep >= 2 ? 6 : 9;
+          const ix = e.bossIndex;
+          if (e.specialBoss) {
+            const sb = SPECIAL_BOSSES[e.specialBossIndex];
+            if (sb.attack === 'mist') { R.debuff = R.debuff || {}; R.debuff.click = 4; toast(e.name + ' скрывается в тумане: клики ослаблены!'); }
+            else if (sb.attack === 'drain') { S.chakra = Math.max(0, S.chakra - 22); toast(e.name + ' поглощает 22 чакры!'); }
+            else if (sb.attack === 'guard') { R.debuff = R.debuff || {}; R.debuff.guard = 5; toast(e.name + ' поднимает непробиваемую защиту: твой урон снижен!'); }
+            else if (sb.attack === 'blast') { e.timer = Math.max(0, e.timer - 5); toast(e.name + ' взрывает поле боя: время сокращается!'); }
+            else if (sb.attack === 'paper') { R.debuff = R.debuff || {}; R.debuff.click = 3; e.timer = Math.max(0, e.timer - 2); toast(e.name + ' окружает отряд взрывными бумажными печатями!'); }
+            else if (sb.attack === 'genjutsu') { R.debuff = R.debuff || {}; R.debuff.allies = 4; toast(e.name + ' затягивает отряд в гендзюцу!'); }
+            else if (sb.attack === 'gravity') { S.chakra = Math.max(0, S.chakra - 18); R.debuff = R.debuff || {}; R.debuff.click = 3; toast(e.name + ' обрушивает на поле боя гравитацию!'); }
+            else if (sb.attack === 'kamui') { e.hp = Math.min(e.max, e.hp + e.max * .08); toast(e.name + ' уходит в измерение Камуи и восстанавливает 8% здоровья!'); }
+            else if (sb.attack === 'meteor') { R.debuff = R.debuff || {}; R.debuff.guard = 5; e.timer = Math.max(0, e.timer - 3); toast(e.name + ' призывает метеор: времени и сил становится меньше!'); }
+            else if (sb.attack === 'dimension') { S.chakra = Math.max(0, S.chakra - 25); e.hp = Math.min(e.max, e.hp + e.max * .05); toast(e.name + ' меняет измерение, поглощая чакру и восстанавливаясь!'); }
+          } else if (ix === 0) { R.debuff = R.debuff || {}; R.debuff.click = 4; toast(e.name + ' сбивает твой ритм: клики ослаблены!'); }
+          else if (ix === 1) { S.chakra = Math.max(0, S.chakra - 18); toast(e.name + ' поглощает 18 чакры!'); }
+          else if (ix === 2) { R.debuff = R.debuff || {}; R.debuff.allies = 4; toast(e.name + ' подавляет союзников на 4 секунды!'); }
+          else if (ix === 3) { e.timer = Math.max(0, e.timer - 3); toast(e.name + ' ускоряет ход времени!'); }
+          else if (ix === 4) { e.hp = Math.min(e.max, e.hp + e.max * .08); toast(e.name + ' восстанавливает 8% здоровья!'); }
+          else if (ix === 5) { R.debuff = R.debuff || {}; R.debuff.guard = 5; toast(e.name + ' поднимает каменный щит: твой урон снижен!'); }
+          else if (ix === 6) { S.chakra = Math.max(0, S.chakra - 28); R.debuff = R.debuff || {}; R.debuff.click = 3; toast(e.name + ' выпускает лунный импульс и гасит чакру!'); }
+          else { e.hp = Math.min(e.max, e.hp + e.max * .05); e.timer = Math.max(0, e.timer - 2); toast(e.name + ' разрывает пространство: здоровье и время возвращаются!'); }
+        }
+        if (e.timer <= 0) bossFail();
+      }
+    }
+  }
+  for (const p of R.parts) { p.vy += 260 * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.life -= dt; }
+  R.parts = R.parts.filter((p) => p.life > 0);
+  for (const f of R.fx) f.t += dt;
+  R.fx = R.fx.filter((f) => f.t < f.life);
+}
+
+const cv = $('#cv'), ctx = cv.getContext('2d');
+function shadow(cx, y, rx, ry) {
+  ctx.fillStyle = 'rgba(0,0,0,.35)';
+  for (let i = -ry; i <= ry; i++) { const half = Math.round(rx * Math.sqrt(1 - (i * i) / (ry * ry + 0.01))); ctx.fillRect(cx - half, y + i, half * 2, 1); }
+}
+function draw(t) {
+  const bi = biomeIdx(), b = BIOMES[bi];
+  if (R.bgIdx !== bi) { R.bgIdx = bi; R.bg = paintBG(b, bi * 977 + 13); }
+  ctx.imageSmoothingEnabled = false;
+  ctx.globalAlpha = 1;
+  ctx.drawImage(R.bg, 0, 0);
+
+  /* hero */
+  const hero = sprite('ninja', 'hero', HERO_PAL);
+  const hb = REDUCE ? 0 : Math.round(Math.sin(t / 320));
+  const hx = 30 + Math.round(R.lunge * 14), hy = GROUND - 96 + hb;
+  if (R.buff.focus > 0) { ctx.fillStyle = 'rgba(95,201,238,' + (0.3 + 0.15 * Math.sin(t / 120)).toFixed(2) + ')'; for (let i = -5; i <= 5; i++) { const half = Math.round(48 * Math.sqrt(1 - (i * i) / 30)); ctx.fillRect(hx + 48 - half, GROUND + i, half * 2, 1); } }
+  shadow(hx + 48, GROUND + 1, 34, 3);
+  if (R.buff.clone > 0) { ctx.globalAlpha = 0.4; ctx.drawImage(hero, hx - 24, hy + 2, 96, 96); ctx.drawImage(hero, hx - 12, hy - 1, 96, 96); ctx.globalAlpha = 1; }
+  ctx.drawImage(hero, hx, hy, 96, 96);
+
+  /* enemy */
+  const e = R.enemy;
+  if (e) {
+    const gm = enemyGeom();
+    const pal = b.pal;
+    const spr = sprite(e.kind, 'b' + bi, pal);
+    let dy = e.kind === 'wisp' ? Math.round(Math.sin(t / 250 + e.phase) * 4) - 8 : (REDUCE ? 0 : Math.round(Math.sin(t / 400 + e.phase)));
+    const sx = REDUCE ? 0 : Math.round((Math.random() - 0.5) * R.shake * 6);
+    if (e.dying) { dy += Math.round(e.dying * 40); ctx.globalAlpha = Math.max(0, 1 - e.dying / 0.35); }
+    if (R.buff.seal > 0) { ctx.fillStyle = '#8a6a45'; ctx.fillRect(gm.x - 12, GROUND - 22, 6, 22); ctx.fillRect(gm.x + gm.size + 6, GROUND - 22, 6, 22); ctx.fillStyle = '#b08a58'; ctx.fillRect(gm.x - 13, GROUND - 24, 8, 3); ctx.fillRect(gm.x + gm.size + 5, GROUND - 24, 8, 3); }
+    shadow(gm.cx, GROUND + 1, gm.size * 0.36, 3);
+    ctx.save(); ctx.translate(gm.x + gm.size + sx, GROUND - gm.size + dy); ctx.scale(-1, 1); ctx.drawImage(spr, 0, 0, gm.size, gm.size); ctx.restore();
+    ctx.globalAlpha = 1;
+  }
+
+  /* effects */
+  for (const f of R.fx) {
+    const p = f.t / f.life;
+    if (f.type === 'slash') {
+      ctx.globalAlpha = 1 - p;
+      const n = f.big ? 20 : 14;
+      for (let i = -n; i <= n; i++) { ctx.fillStyle = Math.abs(i) < n * 0.6 ? '#ffffff' : '#5fc9ee'; ctx.fillRect(Math.round(f.x + i), Math.round(f.y + i * f.dir * 0.8), 2, 2); }
+      ctx.globalAlpha = 1;
+    } else if (f.type === 'fire') {
+      const rad = Math.round(10 + p * 36);
+      ctx.globalAlpha = Math.max(0, 0.95 - p);
+      disc(ctx, Math.round(f.x), Math.round(f.y), rad, '#e8602c');
+      disc(ctx, Math.round(f.x), Math.round(f.y), Math.round(rad * 0.65), '#ffb347');
+      disc(ctx, Math.round(f.x), Math.round(f.y), Math.round(rad * 0.3), '#fff4c2');
+      ctx.globalAlpha = 1;
+    }
+  }
+  for (const q of R.parts) { ctx.fillStyle = q.col; ctx.fillRect(Math.round(q.x), Math.round(q.y), 2, 2); }
+}
+
+/* ================= UI: building ================= */
+const rows = { allies: [], bossAllies: [], tai: [], eye: [] };
+function buildPips() {
+  const box = $('#pips'); box.innerHTML = '';
+  for (let i = 0; i < ZONE_KILLS; i++) box.appendChild(Object.assign(document.createElement('i'), { className: 'pip' }));
+  const cp = $('#cpips'); cp.innerHTML = '';
+  for (let i = 0; i < 5; i++) cp.appendChild(Object.assign(document.createElement('i'), { className: 'cp' }));
+}
+function buildSkills() {
+  const box = $('#skills'); box.innerHTML = '';
+  SKILLS.forEach((s, i) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'skill'; b.title = s.desc; b.dataset.id = s.id;
+    b.innerHTML = '<span class="key">' + (i + 1) + '</span><span class="kj" aria-hidden="true">' + s.kanji + '</span><span class="sn">' + s.name + '</span><span class="sc"></span><span class="cd"></span>';
+    b.addEventListener('click', () => useSkill(s.id));
+    box.appendChild(b);
+    b._r = { sc: $('.sc', b), cd: $('.cd', b), def: s };
+  });
+}
+function rowShell(avatarHTML) {
+  const li = document.createElement('li'); li.className = 'row';
+  li.innerHTML = avatarHTML + '<div class="info"><div class="nm"><b></b><em></em></div><div class="meta"></div><div class="nums"></div><div class="next"></div></div><button type="button" class="btn buy"><span class="b1"></span><span class="b2"></span></button>';
+  li._r = { nm: $('.nm b', li), rank: $('.nm em', li), meta: $('.meta', li), nums: $('.nums', li), next: $('.next', li), btn: $('.buy', li), b1: $('.b1', li), b2: $('.b2', li) };
+  return li;
+}
+function buildAllies() {
+  const ul = $('#listAllies'); ul.innerHTML = ''; rows.allies = [];
+  ALLIES.forEach((a, i) => {
+    const li = rowShell('<img class="av" width="48" height="48" alt="">');
+    $('img', li).src = sprite('ninja', a.id, a.pal).toDataURL();
+    li._r.nm.textContent = a.name;
+    li._r.meta.innerHTML = '<span class="chip"></span><span class="sty"></span>';
+    li._r.chip = $('.chip', li); li._r.sty = $('.sty', li);
+    li._r.chip.textContent = a.clan; li._r.chip.style.background = CLAN_COL[a.clan];
+    li._r.sty.textContent = a.style;
+    li.classList.add('ally-row');
+    li.tabIndex = 0;
+    li.title = 'Нажми на карточку, чтобы открыть историю и развитие пассивок';
+    li.setAttribute('aria-label', a.name + '. Открыть историю и пассивные способности');
+    li.addEventListener('click', (ev) => { if (!ev.target.closest('.buy')) openAllyModal(i); });
+    li.addEventListener('keydown', (ev) => {
+      if ((ev.key === 'Enter' || ev.key === ' ') && !ev.target.closest('.buy')) { ev.preventDefault(); openAllyModal(i); }
+    });
+    li._r.btn.addEventListener('click', (ev) => { ev.stopPropagation(); buyAlly(i); });
+    ul.appendChild(li); rows.allies.push(li);
+  });
+}
+function buildTap() {
+  const ul = $('#listTai'); ul.innerHTML = ''; rows.tai = [];
+  TAP.forEach((t) => {
+    const li = rowShell('<div class="av kj" aria-hidden="true">拳</div>');
+    li._r.nm.textContent = t.name;
+    li._r.btn.addEventListener('click', () => buyTap(t));
+    ul.appendChild(li); rows.tai.push(li);
+  });
+}
+function buildEyes() {
+  const ul = $('#listEye'); ul.innerHTML = ''; rows.eye = [];
+  EYES.forEach((t) => {
+    const li = rowShell('<div class="av kj" aria-hidden="true">眼</div>');
+    li._r.nm.textContent = t.name;
+    li._r.btn.classList.add('eyebuy');
+    li._r.btn.addEventListener('click', () => buyEye(t));
+    ul.appendChild(li); rows.eye.push(li);
+  });
+}
+
+/* ================= UI: actions ================= */
+function buyAlly(i) {
+  const a = ALLIES[i], p = planBuy(a.base, 1.07, S.allies[i], Infinity);
+  if (!p.afford || p.n < 1) return;
+  if (!S.godMode) S.gold -= p.cost; S.allies[i] += p.n;
+  if (S.allies[i] === p.n) toast(a.name + ' присоединяется к отряду');
+  updateUI(true);
+}
+function buyTap(t) {
+  const p = planBuy(t.base, t.r, S.tap[t.id], t.max);
+  if (!p.afford || p.n < 1) return;
+  if (!S.godMode) S.gold -= p.cost; S.tap[t.id] += p.n; updateUI(true);
+}
+function buyEye(t) {
+  const L = S.eye[t.id], cost = L + 1;
+  if (L >= t.max || S.points < cost) return;
+  S.points -= cost; S.eye[t.id]++; updateUI(true);
+}
+function rebirth() {
+  const gain = pointsGain(); if (gain < 1) return;
+  const n = newState();
+  n.eye = S.eye; n.points = S.points + gain; n.rebirths = S.rebirths + 1; n.bestEver = S.bestEver; n.trialClaims = S.trialClaims.slice(); n.seen = true;
+  S = n;
+  R.cd = { fire: 0, clone: 0, seal: 0, focus: 0, rasengan: 0, chidori: 0, water: 0, summon: 0 }; R.buff = { clone: 0, seal: 0, focus: 0, chidori: 0, water: 0, summon: 0 }; R.debuff = {}; R.combo = 0; R.acc = 0;
+  spawn(); save();
+  toast('Перерождение! Получено очков глаза: ' + gain);
+  setTab('eye'); updateUI(true);
+}
+function resetAll() {
+  try { localStorage.removeItem(KEY); } catch (e) {}
+  S = newState(true);
+  R.cd = { fire: 0, clone: 0, seal: 0, focus: 0, rasengan: 0, chidori: 0, water: 0, summon: 0 }; R.buff = { clone: 0, seal: 0, focus: 0, chidori: 0, water: 0, summon: 0 }; R.debuff = {}; R.combo = 0;
+  $('#hint').classList.remove('off');
+  spawn(); setTab('allies'); toast('Сохранение стёрто. Начинаем с нуля.'); updateUI(true);
+}
+function toggleGodMode() {
+  S.godMode = !S.godMode;
+  if (S.godMode) {
+    // В режиме бога баланс не расходуется; прежнюю сумму вернём при выключении.
+    S.godGoldBackup = Math.max(0, Number.isFinite(S.gold) ? S.gold : 0);
+    S.gold = Number.MAX_SAFE_INTEGER;
+    // Запоминаем настройки автоматики, чтобы восстановить их при выключении.
+    R.godPrevAuto = S.auto;
+    R.godPrevAutoClick = S.autoClick;
+    // Быстрый тестовый переход: сразу к первому легендарному противнику.
+    if (S.zone < 100) goZone(100);
+    else { S.kills = 0; }
+    S.maxZone = Math.max(S.maxZone, 100);
+    S.bestEver = Math.max(S.bestEver, 100);
+    // Оставляем босса на экране, чтобы игрок сам решил, когда нанести решающий удар.
+    S.auto = false;
+    S.autoClick = false;
+    R.autoAcc = 0;
+    R.acc = 0;
+    R.accT = 0;
+    spawn();
+    toast('РЕЖИМ БОГА активирован. Добро пожаловать в зону 100!');
+  } else {
+    // Возвращаем обычный баланс, который был до включения режима бога.
+    S.gold = Number.isFinite(S.godGoldBackup) ? Math.max(0, S.godGoldBackup) : 0;
+    S.godGoldBackup = null;
+    // После перезагрузки в активном режиме временные значения недоступны — включаем оба автомата.
+    S.auto = typeof R.godPrevAuto === 'boolean' ? R.godPrevAuto : true;
+    S.autoClick = typeof R.godPrevAutoClick === 'boolean' ? R.godPrevAutoClick : true;
+    delete R.godPrevAuto;
+    delete R.godPrevAutoClick;
+    toast('Режим бога выключен. Обычный баланс восстановлен.');
+  }
+  updateUI(true);
+  save();
+}
+function twoStep(btn, idle, sure, fn) {
+  let timer = null;
+  btn._idle = idle;
+  btn.addEventListener('click', () => {
+    if (btn.disabled) return;
+    if (btn.dataset.armed) { clearTimeout(timer); delete btn.dataset.armed; fn(); btn._t = undefined; }
+    else { btn.dataset.armed = '1'; btn.textContent = sure; btn._t = sure; timer = setTimeout(() => { delete btn.dataset.armed; btn._t = undefined; }, 4000); }
+  });
+}
+function setTab(name) {
+  R.tab = name;
+  $$('.tab').forEach((t) => t.setAttribute('aria-selected', String(t.dataset.tab === name)));
+  ['allies', 'tai', 'eye', 'reb', 'chronicle'].forEach((n) => { $('#pane-' + n).hidden = n !== name; });
+  updateUI(true);
+}
+let toastBox = null;
+function toast(msg) {
+  toastBox = toastBox || $('#toasts');
+  while (toastBox.childElementCount >= 3) toastBox.removeChild(toastBox.firstChild);
+  const d = document.createElement('div'); d.className = 'toast'; d.textContent = msg;
+  toastBox.appendChild(d);
+  setTimeout(() => d.remove(), 3600);
+}
+
+/* ================= UI: updating ================= */
+function setBuyBtn(r, label, cost, ok, off) {
+  setText(r.b1, label); setText(r.b2, cost);
+  r.btn.disabled = off || !ok;
+  setCls(r.btn, 'ok', !!ok && !off);
+}
+function updateUI(force) {
+  const e = R.enemy, b = BIOMES[biomeIdx()], boss = S.zone % 5 === 0;
+  setText($('#stGold'), S.godMode ? '∞' : fmt(S.gold));
+  setText($('#stDps'), fmt(dps()));
+  setText($('#stClick'), fmt(clickExpected()));
+  const eyeOn = S.rebirths > 0 || S.points > 0;
+  $('#stEyeBox').hidden = !eyeOn; setText($('#stEye'), String(S.points));
+
+  setText($('#region'), b.name);
+  setText($('#zoneLbl'), 'Зона ' + S.zone + (e && e.specialBoss ? ' · Легендарный босс' : boss ? ' · Босс' : ''));
+  const pips = $('#pips'); setCls(pips, 'boss', boss);
+  $$('.pip', pips).forEach((p, i) => setCls(p, 'on', !boss && i < Math.min(S.kills, ZONE_KILLS)));
+
+  if (e) {
+    setText($('#eName'), e.name); setText($('#eKind'), (e.specialBoss ? 'ЛЕГЕНДАРНЫЙ БОСС' : KIND_LBL[e.kind]) + (e.boss ? ' · ФАЗА ' + (e.phaseStep + 1) : ''));
+    $('#hpFill').style.width = Math.max(0, e.hp / e.max * 100).toFixed(1) + '%';
+    setText($('#hpTxt'), fmt(Math.max(0, Math.ceil(e.hp))) + ' / ' + fmt(e.max));
+    const tb = $('#timerBox'); tb.hidden = !e.boss || S.godMode;
+    if (e.boss) {
+      $('#timerFill').style.width = Math.max(0, Math.min(100, e.timer / e.maxTimer * 100)).toFixed(1) + '%';
+      setText($('#timerTxt'), 'Босс уйдёт через ' + Math.max(0, Math.ceil(e.timer)) + ' с');
+      setCls(tb, 'low', e.timer < 8);
+    }
+  }
+  const cp = $$('.cp'); cp.forEach((c, i) => setCls(c, 'on', i < R.combo));
+  setCls($('#cpips'), 'ready', R.combo >= 4);
+  $('#chFill').style.width = S.chakra.toFixed(1) + '%';
+  setText($('#chTxt'), 'Чакра ' + Math.floor(S.chakra) + ' / 100');
+
+  $$('.skill').forEach((s) => {
+    const d = s._r.def, cd = R.cd[d.id], live = R.buff[d.id] > 0;
+    const locked = S.bestEver < d.unlock;
+    const blocked = locked || cd > 0 || S.chakra < d.cost;
+    s.setAttribute('aria-disabled', String(blocked));
+    setCls(s, 'live', live);
+    setText(s._r.sc, locked ? 'Зона ' + d.unlock : (live ? Math.ceil(R.buff[d.id]) + ' с' : (cd > 0 ? Math.ceil(cd) + ' с' : d.cost + ' чакры')));
+    s._r.cd.style.height = cd > 0 ? (cd / d.cd * 100).toFixed(1) + '%' : '0';
+  });
+
+  $('#btnBack').disabled = S.zone <= 1;
+  $('#btnFwd').disabled = !canForward();
+  $('#btnAuto').setAttribute('aria-pressed', String(S.auto));
+  $('#btnAutoClick').setAttribute('aria-pressed', String(S.autoClick));
+  setText($('#btnAutoClick'), 'Авто-клик: ' + (S.autoClick ? 'ВКЛ' : 'ВЫКЛ'));
+  $('#btnGod').setAttribute('aria-pressed', String(S.godMode));
+  setText($('#btnGod'), S.godMode ? '⚡ Режим бога: ВКЛ' : '⚡ Режим бога: ВЫКЛ');
+  setText($('#godHint'), S.godMode ? '∞ Рё и ×1 000 000 000 к урону. Покупки бесплатны, босс не атакует и не ограничен таймером. При выключении вернётся прежний баланс.' : 'Мгновенно переносит в зону 100, даёт бесконечные Рё, усиливает весь урон и отключает таймеры боссов. При выключении вернётся прежний баланс.');
+
+  if (R.tab === 'allies') updateAllies();
+  else if (R.tab === 'tai') updateTap();
+  else if (R.tab === 'eye') updateEyes();
+  else if (R.tab === 'reb') updateRebirth();
+  else updateChronicle();
+  if (R.modalBoss >= 0 && !$('#allyModal').hidden) {
+    if (R.modalBoss < S.recruitedBosses.length) {
+      const entry = S.recruitedBosses[R.modalBoss], sig = entry ? entry.id + ':' + entry.zone : '';
+      if (sig !== R.modalBossSig) renderBossAllyModal(R.modalBoss);
+    } else closeAllyModal();
+  } else if (R.modalAlly >= 0 && !$('#allyModal').hidden) {
+    if (R.modalLevel !== S.allies[R.modalAlly]) renderAllyModal(R.modalAlly);
+    else updateAllyModalUpgrade(R.modalAlly);
+  }
+}
+function updateLegendRoster() {
+  const wrap = $('#legendRosterWrap'), ul = $('#legendRoster');
+  const sig = JSON.stringify(S.recruitedBosses || []);
+  wrap.hidden = !(S.recruitedBosses && S.recruitedBosses.length);
+  if (R.bossRosterSig !== sig) {
+    R.bossRosterSig = sig; ul.innerHTML = ''; rows.bossAllies = [];
+    (S.recruitedBosses || []).forEach((entry, i) => {
+      const b = SPECIAL_BOSSES.find((x) => x.id === entry.id); if (!b) return;
+      const li = rowShell('<img class="av" width="48" height="48" alt="">');
+      $('img', li).src = sprite('ninja', b.id, b.pal).toDataURL();
+      li._r.nm.textContent = b.name;
+      li._r.meta.innerHTML = '<span class="chip"></span><span class="sty"></span>';
+      li._r.chip = $('.chip', li); li._r.sty = $('.sty', li);
+      li._r.chip.textContent = 'Легендарный союзник'; li._r.chip.style.background = '#8a6430';
+      li._r.sty.textContent = b.style;
+      li.classList.add('ally-row'); li.tabIndex = 0;
+      li.title = 'Нажми, чтобы прочитать историю вашей встречи';
+      li.setAttribute('aria-label', b.name + '. История встречи и особая техника.');
+      li.addEventListener('click', () => openBossAllyModal(i));
+      li.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); openBossAllyModal(i); } });
+      li._r.btn.hidden = true;
+      ul.appendChild(li); rows.bossAllies.push(li);
+    });
+  }
+  (S.recruitedBosses || []).forEach((entry, i) => {
+    const li = rows.bossAllies[i], b = SPECIAL_BOSSES.find((x) => x.id === entry.id); if (!li || !b) return;
+    setText(li._r.rank, 'До перерождения');
+    setText(li._r.nums, fmt(entry.dps) + ' урона/с');
+    setText(li._r.next, b.passiveText);
+  });
+}
+function updateAllies() {
+  $$('#buyMode .btn').forEach((bt) => bt.setAttribute('aria-pressed', String(bt.dataset.mode === R.buyMode)));
+  updateLegendRoster();
+  const first = S.allies.findIndex((L) => L === 0), last = first === -1 ? ALLIES.length - 1 : first;
+  const counts = {}; ALLIES.forEach((a, j) => { counts[a.clan] = counts[a.clan] || { have: 0, all: 0 }; counts[a.clan].all++; if (S.allies[j] > 0) counts[a.clan].have++; });
+  const clans = $('#clans'); const sig = JSON.stringify(counts);
+  if (clans._sig !== sig) {
+    clans._sig = sig; clans.innerHTML = '';
+    Object.keys(counts).forEach((c) => {
+      if (counts[c].all < 2) return;
+      const n = counts[c].have, m = n >= 3 ? '×1,5' : n === 2 ? '×1,25' : 'нет бонуса';
+      const s = document.createElement('span'); s.className = 'chip'; s.style.background = CLAN_COL[c]; s.style.opacity = n >= 2 ? '1' : '.55';
+      s.textContent = c + ' ' + n + '/' + counts[c].all + ' · ' + m; clans.appendChild(s);
+    });
+  }
+  ALLIES.forEach((a, i) => {
+    const li = rows.allies[i], r = li._r, vis = i <= last;
+    if (li.hidden === vis) li.hidden = !vis;
+    if (!vis) return;
+    const L = S.allies[i], cm = clanMult(i);
+    setText(r.rank, rankOf(L));
+    setText(r.chip, a.clan + (L > 0 && cm > 1 ? ' ×' + String(cm).replace('.', ',') : ''));
+    if (L > 0) { setText(r.nums, 'Ур. ' + L + ' · ' + fmt(allyDpsOf(i)) + ' урона/с'); const nm = nextMile(L); setText(r.next, 'Ур. ' + nm.lvl + ': урон ×' + nm.mult); }
+    else { setText(r.nums, a.title); setText(r.next, 'Даёт ' + fmt(a.dps) + ' урона/с за уровень'); }
+    const p = planBuy(a.base, 1.07, L, Infinity);
+    setBuyBtn(r, (L === 0 ? 'Нанять' : 'Повысить') + (p.n > 1 ? ' ×' + p.n : ''), fmt(p.cost) + ' Рё', p.afford, false);
+  });
+}
+function updateTap() {
+  TAP.forEach((t, i) => {
+    const r = rows.tai[i]._r, L = S.tap[t.id];
+    setText(r.rank, 'Ур. ' + L);
+    setText(r.nums, t.eff(L));
+    const nm = t.id === 'power' ? nextMile(L) : null;
+    setText(r.next, nm ? 'Ур. ' + nm.lvl + ': урон ×' + nm.mult : (L >= t.max ? 'Максимальный уровень' : ' '));
+    const p = planBuy(t.base, t.r, L, t.max);
+    if (p.capped) { setText(r.b1, 'Максимум'); setText(r.b2, ' '); r.btn.disabled = true; setCls(r.btn, 'ok', false); }
+    else setBuyBtn(r, 'Улучшить' + (p.n > 1 ? ' ×' + p.n : ''), fmt(p.cost) + ' Рё', p.afford, false);
+  });
+}
+function updateEyes() {
+  const open = S.rebirths > 0 || S.points > 0 || EYES.some((t) => S.eye[t.id] > 0);
+  $('#eyeLocked').hidden = open; $('#eyeBody').hidden = !open;
+  if (!open) return;
+  setText($('#eyePts'), String(S.points));
+  EYES.forEach((t, i) => {
+    const r = rows.eye[i]._r, L = S.eye[t.id], cost = L + 1;
+    setText(r.rank, 'Ур. ' + L);
+    setText(r.nums, t.eff(L)); setText(r.next, ' ');
+    if (L >= t.max) { setText(r.b1, 'Максимум'); setText(r.b2, ' '); r.btn.disabled = true; setCls(r.btn, 'ok', false); }
+    else setBuyBtn(r, 'Улучшить', cost + ' оч.', S.points >= cost, false);
+  });
+}
+function updateRebirth() {
+  const gain = pointsGain();
+  setText($('#rbBest'), String(S.maxZone)); setText($('#rbGain'), '+' + gain); setText($('#rbCount'), String(S.rebirths));
+  const b = $('#btnRebirth');
+  b.disabled = gain < 1;
+  if (!b.dataset.armed) setText(b, gain < 1 ? 'Недоступно до зоны 25' : 'Переродиться · +' + gain + ' оч.');
+  else b.textContent = 'Точно? Нажми ещё раз';
+  const nextAt = S.maxZone < 25 ? 25 : (Math.floor((S.maxZone - 20) / 5) + 1) * 5 + 20;
+  setText($('#rbHint'), gain < 1 ? 'Дойди до зоны 25, чтобы получить первое очко глаза.' : 'Ещё одно очко глаза будет в зоне ' + nextAt + '.');
+  const rs = $('#btnReset'); if (!rs.dataset.armed) setText(rs, 'Стереть сохранение'); else rs.textContent = 'Точно стереть? Нажми ещё раз';
+}
+
+/* ================= ally dossier: lore and passive progression ================= */
+function closeAllyModal() {
+  const modal = $('#allyModal');
+  if (modal.hidden) return;
+  modal.hidden = true;
+  modal.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('modal-open');
+  tgBackButton(false);
+  const i = R.modalAlly, bi = R.modalBoss;
+  R.modalAlly = -1; R.modalBoss = -1; R.modalBossSig = ''; R.modalLevel = -1;
+  if (i >= 0 && rows.allies[i]) rows.allies[i].focus();
+  else if (bi >= 0 && rows.bossAllies && rows.bossAllies[bi]) rows.bossAllies[bi].focus();
+}
+function updateAllyModalUpgrade(i) {
+  if (i < 0 || i >= ALLIES.length) return;
+  const a = ALLIES[i], L = S.allies[i];
+  const plan = planBuy(a.base, 1.07, L, Infinity);
+  const b = $('#allyModalUpgrade');
+  setText($('.b1', b), (L === 0 ? 'Нанять' : 'Повысить') + (plan.n > 1 ? ' ×' + plan.n : ''));
+  setText($('.b2', b), fmt(plan.cost) + ' Рё');
+  b.disabled = !plan.afford || plan.n < 1;
+  if (!plan.afford || plan.n < 1) b.title = 'Недостаточно Рё'; else b.title = 'Купить уровни союзника';
+}
+function renderAllyModal(i) {
+  const a = ALLIES[i], L = S.allies[i];
+  R.modalAlly = i; R.modalBoss = -1; R.modalBossSig = ''; R.modalLevel = L;
+  setText($('#allyModalTitle'), 'ДОСЬЕ СОЮЗНИКА');
+  setText($('#allyModalLoreTitle'), 'ЛИЧНАЯ ИСТОРИЯ');
+  setText($('#allyModalPassivesTitle'), 'ПАССИВНЫЕ СПОСОБНОСТИ И ИХ ИСТОРИИ');
+  $('#allyModalUpgrade').hidden = false;
+  const modal = $('#allyModal');
+  $('#allyModalPortrait').src = sprite('ninja', a.id, a.pal).toDataURL();
+  setText($('#allyModalName'), a.name);
+  setText($('#allyModalSubtitle'), a.title + ' · ' + a.clan + ' · ' + a.style);
+  setText($('#allyModalLevel'), L > 0 ? 'Уровень ' + L + ' · ' + rankOf(L) : 'Пока не состоит в отряде');
+  setText($('#allyModalBio'), ALLY_LORE[a.id]);
+  const box = $('#allyModalPassives'); box.innerHTML = '';
+  (ALLY_PASSIVES[a.id] || []).forEach((p, ix) => {
+    const unlocked = L >= p.lvl;
+    const progress = Math.max(0, Math.min(100, L / p.lvl * 100));
+    const card = document.createElement('article');
+    card.className = 'ally-passive' + (unlocked ? ' unlocked' : '');
+    const top = document.createElement('div'); top.className = 'ally-passive-top';
+    const nameWrap = document.createElement('div');
+    const title = document.createElement('h4'); title.textContent = 'Этап ' + (ix + 1) + ' · ' + p.text.split(':')[0];
+    const effect = document.createElement('p'); effect.className = 'ally-passive-effect'; effect.textContent = p.text;
+    nameWrap.append(title, effect);
+    const state = document.createElement('span'); state.className = 'ally-passive-state';
+    state.textContent = unlocked ? 'ПРОБУЖДЕНА' : 'ЗАКРЫТА · УР. ' + p.lvl;
+    top.append(nameWrap, state);
+    const bar = document.createElement('div'); bar.className = 'ally-progress';
+    const fill = document.createElement('i'); fill.style.width = progress.toFixed(1) + '%'; bar.appendChild(fill);
+    const progressText = document.createElement('div'); progressText.className = 'ally-progress-label';
+    progressText.textContent = unlocked ? 'Пассивка активна' : 'Прогресс: ' + L + ' / ' + p.lvl + ' уровней';
+    const story = document.createElement('p'); story.className = 'ally-passive-story'; story.textContent = p.story || 'История этого испытания скоро будет раскрыта.';
+    card.append(top, bar, progressText, story); box.appendChild(card);
+  });
+  setText($('#allyModalHint'), L > 0 ? 'Пассивки автоматически пробуждаются на уровнях 10, 25, 50 и 100.' : 'Найми союзника, затем повышай его уровень, чтобы пробуждать пассивки.');
+  updateAllyModalUpgrade(i);
+}
+function renderBossAllyModal(i) {
+  const entry = S.recruitedBosses[i]; if (!entry) return;
+  const b = SPECIAL_BOSSES.find((x) => x.id === entry.id); if (!b) return;
+  R.modalAlly = -1; R.modalBoss = i; R.modalBossSig = entry.id + ':' + entry.zone; R.modalLevel = -1;
+  const modal = $('#allyModal');
+  $('#allyModalPortrait').src = sprite('ninja', b.id, b.pal).toDataURL();
+  setText($('#allyModalTitle'), 'ДОСЬЕ ЛЕГЕНДАРНОГО СОЮЗНИКА');
+  setText($('#allyModalName'), b.name);
+  setText($('#allyModalSubtitle'), b.title + ' · ' + b.style);
+  setText($('#allyModalLevel'), 'Вступил в отряд после победы в зоне ' + entry.zone + ' · до перерождения');
+  setText($('#allyModalLoreTitle'), 'ИСТОРИЯ ВСТРЕЧИ С ТОБОЙ');
+  setText($('#allyModalBio'), b.story);
+  setText($('#allyModalPassivesTitle'), 'ТЕХНИКА, КОТОРУЮ ОН ПРИНОСИТ В ОТРЯД');
+  const box = $('#allyModalPassives'); box.innerHTML = '';
+  const card = document.createElement('article'); card.className = 'ally-passive unlocked';
+  const top = document.createElement('div'); top.className = 'ally-passive-top';
+  const nameWrap = document.createElement('div');
+  const title = document.createElement('h4'); title.textContent = b.passiveText.split(':')[0];
+  const effect = document.createElement('p'); effect.className = 'ally-passive-effect'; effect.textContent = b.passiveText;
+  nameWrap.append(title, effect);
+  const state = document.createElement('span'); state.className = 'ally-passive-state'; state.textContent = 'АКТИВНА ДО ПЕРЕРОЖДЕНИЯ';
+  top.append(nameWrap, state);
+  const bar = document.createElement('div'); bar.className = 'ally-progress';
+  const fill = document.createElement('i'); fill.style.width = '100%'; bar.appendChild(fill);
+  const progressText = document.createElement('div'); progressText.className = 'ally-progress-label'; progressText.textContent = 'Легендарный союзник сражается на твоей стороне автоматически.';
+  card.append(top, bar, progressText); box.appendChild(card);
+  setText($('#allyModalHint'), 'Этот союз временный. После перерождения легендарный шиноби покинет отряд, а новый цикл начнётся с чистого состава.');
+  $('#allyModalUpgrade').hidden = true;
+}
+function openBossAllyModal(i) {
+  renderBossAllyModal(i);
+  const modal = $('#allyModal'); modal.hidden = false;
+  modal.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('modal-open');
+  tgBackButton(true);
+  $('#allyModalClose').focus();
+}
+
+function openAllyModal(i) {
+  renderAllyModal(i);
+  const modal = $('#allyModal');
+  modal.hidden = false;
+  modal.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('modal-open');
+  tgBackButton(true);
+  $('#allyModalClose').focus();
+}
+
+/* ================= chronicle, ranks and trials ================= */
+const TRIALS = [
+  { zone: 5, title: 'Первый рубеж', desc: 'Победи первого хранителя зоны.', reward: '+5% ко всему урону' },
+  { zone: 10, title: 'Испытание генина', desc: 'Докажи, что умеешь действовать вместе с отрядом.', reward: '+5% ко всему урону' },
+  { zone: 15, title: 'Печать чунина', desc: 'Преодолей усиленного противника и освой новые техники.', reward: '+5% ко всему урону' },
+  { zone: 20, title: 'Путь дзёнина', desc: 'Сохрани строй и доведи отряд до нового рубежа.', reward: '+5% ко всему урону' },
+  { zone: 25, title: 'Испытание Кагэ', desc: 'Победи босса 25-й зоны и подтверди мастерство.', reward: '+5% ко всему урону' },
+];
+function rankData() {
+  const z = S.bestEver;
+  if (z >= 25) return ['Кагэ', 'Ты достиг вершины пути шиноби.'];
+  if (z >= 20) return ['Дзёнин', 'До звания Кагэ остался последний рубеж.'];
+  if (z >= 10) return ['Чунин', 'Ты уже способен вести отряд через опасные зоны.'];
+  if (z >= 5) return ['Генин', 'Первое настоящее испытание пройдено.'];
+  return ['Ученик Академии', 'Дойди до 5-й зоны и пройди первое испытание.'];
+}
+function buildChronicle() {
+  const trials = $('#trials'); trials.innerHTML = '';
+  TRIALS.forEach((t, i) => {
+    const done = S.trialClaims.includes(i), ready = S.bestEver >= t.zone;
+    const el = document.createElement('div'); el.className = 'trial' + (done ? ' done' : '');
+    const info = document.createElement('div');
+    info.innerHTML = '<b>' + t.title + ' · зона ' + t.zone + '</b><small>' + t.desc + ' Награда: ' + t.reward + '.</small>';
+    const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'btn';
+    btn.textContent = done ? 'Пройдено' : ready ? 'Забрать награду' : 'Закрыто'; btn.disabled = done || !ready;
+    btn.addEventListener('click', () => { if (done || S.bestEver < t.zone) return; S.trialClaims.push(i); toast('Испытание пройдено! Постоянный бонус к урону +5%.'); updateUI(true); save(); });
+    el.append(info, btn); trials.appendChild(el);
+  });
+  const lore = $('#loreList'); lore.innerHTML = '';
+  ALLIES.forEach((a, i) => {
+    const L = S.allies[i], card = document.createElement('article'); card.className = 'lore-card';
+    const passive = (ALLY_PASSIVES[a.id] || []).map((p) => '<div class="passive-line">' + (L >= p.lvl ? '✓ ' : '🔒 ') + 'Ур. ' + p.lvl + ' — ' + p.text + '</div>').join('');
+    card.innerHTML = '<b>' + a.name + ' · ' + a.title + ' · ' + (L ? 'ур. ' + L : 'ещё не в отряде') + '</b><p>' + ALLY_LORE[a.id] + '</p>' + passive;
+    lore.appendChild(card);
+  });
+  const legend = $('#legendLore'); legend.innerHTML = '';
+  (S.recruitedBosses || []).forEach((entry) => {
+    const b = SPECIAL_BOSSES.find((x) => x.id === entry.id); if (!b) return;
+    const card = document.createElement('article'); card.className = 'lore-card';
+    const title = document.createElement('b'); title.textContent = b.name + ' · зона ' + entry.zone + ' · временный союзник';
+    const story = document.createElement('p'); story.textContent = b.story;
+    const passive = document.createElement('div'); passive.className = 'passive-line'; passive.textContent = 'Особая техника: ' + b.passiveText;
+    card.append(title, story, passive); legend.appendChild(card);
+  });
+  if (!(S.recruitedBosses || []).length) { const empty = document.createElement('article'); empty.className = 'lore-card'; empty.textContent = 'Пока ни один легендарный противник не принял временный союз. Первый появится после победы над боссом 100-й зоны.'; legend.appendChild(empty); }
+}
+function updateChronicle() {
+  const r = rankData(); setText($('#rankName'), r[0]); setText($('#rankHint'), r[1]);
+  const sig = JSON.stringify([S.bestEver, S.allies, S.trialClaims, S.recruitedBosses]);
+  if (R.chronicleSig !== sig) { R.chronicleSig = sig; buildChronicle(); }
+}
+
+/* ================= input ================= */
+function stageClick(ev) {
+  tgHaptic('light');
+  const rect = cv.getBoundingClientRect();
+  clickAt((ev.clientX - rect.left) / rect.width * W, (ev.clientY - rect.top) / rect.height * H);
+  updateUI();
+}
+$('#stage').addEventListener('pointerdown', (ev) => { if (ev.button !== undefined && ev.button > 0) return; stageClick(ev); });
+$('#stage').addEventListener('keydown', (ev) => {
+  if ((ev.key === ' ' || ev.key === 'Enter') && !ev.repeat) { ev.preventDefault(); const g = enemyGeom(); clickAt(g.cx + rnd(-10, 10), g.cy + rnd(-10, 10)); updateUI(); }
+});
+document.addEventListener('keydown', (ev) => {
+  if (ev.ctrlKey || ev.metaKey || ev.altKey || ev.repeat) return;
+  const i = '12345678'.indexOf(ev.key);
+  if (i >= 0) useSkill(SKILLS[i].id);
+});
+$('#btnBack').addEventListener('click', () => { if (S.zone > 1) { goZone(S.zone - 1); S.auto = false; spawn(); updateUI(); } });
+$('#btnFwd').addEventListener('click', () => { if (canForward()) { goZone(S.zone + 1); spawn(); updateUI(); } });
+$('#btnAuto').addEventListener('click', () => { S.auto = !S.auto; updateUI(); });
+$('#btnAutoClick').addEventListener('click', () => { S.autoClick = !S.autoClick; updateUI(); save(); });
+$('#btnGod').addEventListener('click', toggleGodMode);
+$('#tabs').addEventListener('click', (ev) => { const t = ev.target.closest('.tab'); if (t) setTab(t.dataset.tab); });
+$('#allyModalClose').addEventListener('click', closeAllyModal);
+$('#allyModal').addEventListener('click', (ev) => { if (ev.target.hasAttribute('data-ally-close')) closeAllyModal(); });
+$('#allyModalUpgrade').addEventListener('click', () => { if (R.modalAlly >= 0) buyAlly(R.modalAlly); });
+document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && (R.modalAlly >= 0 || R.modalBoss >= 0)) closeAllyModal(); });
+$('#buyMode').addEventListener('click', (ev) => { const b = ev.target.closest('.btn'); if (b) { R.buyMode = b.dataset.mode; updateUI(true); } });
+twoStep($('#btnRebirth'), 'Переродиться', 'Точно? Нажми ещё раз', rebirth);
+twoStep($('#btnReset'), 'Стереть сохранение', 'Точно стереть? Нажми ещё раз', resetAll);
+
+/* ================= offline & boot ================= */
+function offlineGain(sec) {
+  if (S.godMode) return;
+  const base = allyDpsBase();
+  if (base <= 0 || sec < 30) return;
+  const gain = base * Math.min(sec, 4 * 3600) * GOLD_R * 0.5;
+  S.gold += gain;
+  toast('Пока тебя не было, отряд заработал ' + fmt(gain) + ' Рё');
+}
+
+const loaded = load();
+if (loaded) offlineGain((Date.now() - S.savedAt) / 1000);
+buildPips(); buildSkills(); buildAllies(); buildTap(); buildEyes();
+if (S.seen) $('#hint').classList.add('off');
+spawn(); setTab('allies');
+
+let last = performance.now();
+function frame(now) {
+  let real = (now - last) / 1000; last = now;
+  if (real > 5) { offlineGain(real); real = 0.05; }
+  const dt = Math.min(real, 0.25);
+  tick(dt);
+  draw(now);
+  R.uiT += dt; if (R.uiT >= 0.1) { R.uiT = 0; updateUI(); }
+  R.saveT += dt; if (R.saveT >= 8) { R.saveT = 0; save(); }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+document.addEventListener('visibilitychange', () => { if (document.hidden) save(); });
+window.addEventListener('pagehide', save);
+})();
+</script>
+
+</body></html>
