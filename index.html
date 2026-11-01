@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#10111c">
   <meta name="description" content="Путь Шиноби — браузерный RPG-кликер по мотивам мира Naruto.">
-  <title>Путь Шиноби 2.5 — Новая графика и техники</title>
+  <title>Путь Шиноби 2.7 — Надёжные сохранения и тестовый режим</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;700&family=Press+Start+2P&display=swap">
@@ -668,6 +668,16 @@ body{background-image:radial-gradient(850px 420px at 85% -8%,rgba(60,85,150,.22)
 @media(max-width:520px){.squad-synergy-detail{grid-template-columns:minmax(0,1fr) auto;padding:6px 8px;column-gap:6px}.squad-synergy-detail h4{font-size:10px}.squad-synergy-effect{font-size:9px}.squad-synergy-detail p{font-size:9px}.squad-synergy-detail small{font-size:8px}}
 
 #cv{image-rendering:auto}
+
+/* 2.6: тестовый режим */
+.test-banner{position:sticky;top:0;z-index:60;display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:space-between;padding:8px 14px;background:#7a2a1e;color:#fff;font-size:12px;font-weight:700;box-shadow:0 2px 12px rgba(0,0,0,.4)}
+.test-banner .btn{padding:6px 10px;font-size:12px}
+body.testing .stage{box-shadow:0 0 0 2px #e0643a,0 10px 30px rgba(0,0,0,.4)}
+.test-grid{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:6px 0 10px}
+.test-grid .btn{flex:1 1 130px}
+.test-grid label{display:flex;gap:8px;align-items:center;flex:1 1 150px;font-size:13px}
+.test-grid input{width:84px;min-width:0;padding:8px 10px;border-radius:8px;border:1px solid rgba(160,190,230,.35);background:#0f1424;color:inherit;font:inherit}
+#testOn[hidden],#testOff[hidden]{display:none}
 </style>
   <script src="https://telegram.org/js/telegram-web-app.js?64"></script>
   <script>
@@ -747,7 +757,7 @@ html.reduce-effects .pips.boss .pip{animation:none!important}
       <div class="mark" aria-hidden="true">忍</div>
       <div>
         <h1>Путь Шиноби</h1>
-        <small id="logoSubtitle">2.5 · 16 союзников · два цикла перерождения</small><span class="shop-badge" id="shopSupportBadge" hidden>✦ ПОКРОВИТЕЛЬ</span><span class="shop-badge legend" id="shopLegendBadge" hidden>✦ ЛЕГЕНДА ШИНОБИ</span>
+        <small id="logoSubtitle">2.7 · 16 союзников · два цикла перерождения</small><span class="shop-badge" id="shopSupportBadge" hidden>✦ ПОКРОВИТЕЛЬ</span><span class="shop-badge legend" id="shopLegendBadge" hidden>✦ ЛЕГЕНДА ШИНОБИ</span>
       </div>
     </div>
     <div class="stats" aria-label="Показатели">
@@ -759,6 +769,7 @@ html.reduce-effects .pips.boss .pip{animation:none!important}
     <span class="top-menu-affordance" aria-hidden="true"><span class="menu-glyph">☰</span> МЕНЮ <span class="menu-caret">⌄</span></span>
   </header>
 
+  <div class="test-banner" id="testBanner" hidden><span>ТЕСТОВЫЙ РЕЖИМ · основное сохранение не затронуто</span><button type="button" class="btn" id="testBannerExit">Выйти из теста</button></div>
   <div class="game-menu-backdrop" id="gameMenu" hidden>
     <section class="game-menu" role="dialog" aria-modal="true" aria-labelledby="gameMenuTitle">
       <div class="game-menu-head">
@@ -786,6 +797,35 @@ html.reduce-effects .pips.boss .pip{animation:none!important}
         <label class="menu-setting"><span><b>Уменьшить визуальные эффекты</b><small>Меньше вспышек, частиц, тряски и анимации.</small></span><input type="checkbox" id="settingReduceEffects"></label>
         <div class="menu-save-row"><div><b>Сохранение</b><small id="menuSaveStatus" aria-live="polite">Игра сохраняется автоматически на этом устройстве.</small></div><button type="button" class="btn" id="menuSaveNow">Сохранить сейчас</button></div>
       </section>
+          <details class="preview-tools" id="testLab">
+            <summary>Тестовый режим (отдельное сохранение)</summary>
+            <div id="testOff">
+              <p>Проверка игрового опыта без риска: тест идёт в отдельном сохранении, основной прогресс не читается и не пишется.</p>
+              <div class="test-grid">
+                <button type="button" class="btn" data-test="enter-copy">Тест с копией прогресса</button>
+                <button type="button" class="btn" data-test="enter-fresh">Тест с нуля</button>
+              </div>
+            </div>
+            <div id="testOn" hidden>
+              <p>Скорость игры</p>
+              <div class="test-grid" id="testSpeed">
+                <button type="button" class="btn" data-test="speed" data-arg="1" data-speed="1" aria-pressed="true">×1</button>
+                <button type="button" class="btn" data-test="speed" data-arg="5" data-speed="5" aria-pressed="false">×5</button>
+                <button type="button" class="btn" data-test="speed" data-arg="20" data-speed="20" aria-pressed="false">×20</button>
+              </div>
+              <p>Быстрые действия</p>
+              <div class="test-grid">
+                <button type="button" class="btn" data-test="prepare">Зона 100 и ресурсы</button>
+                <button type="button" class="btn" data-test="gold" data-arg="1e9">+1 млрд Рё</button>
+                <button type="button" class="btn" data-test="chakra">Чакра и техники готовы</button>
+              </div>
+              <div class="test-grid">
+                <label for="testZone">Зона <input id="testZone" type="number" min="1" max="1400" value="50"></label>
+                <button type="button" class="btn" data-test="zone">Перейти</button>
+              </div>
+              <button type="button" class="btn danger" data-test="exit">Выйти из теста</button>
+            </div>
+          </details>
     </section>
   </div>
 
@@ -978,11 +1018,6 @@ html.reduce-effects .pips.boss .pip{animation:none!important}
             <div id="villageBuildings" class="village-grid"></div>
           </section>
 
-          <details class="preview-tools" id="previewTools" hidden>
-            <summary>Инструменты предпросмотра (только браузер)</summary>
-            <p>Быстро подготовить демонстрационное сохранение: зона 100, 100 Очков Глаза и ресурсы для проверки деревни. Это тестовые данные, не подтверждённое игровое достижение.</p>
-            <button type="button" class="btn" id="btnPreparePreview">Подготовить тестовый прогресс</button>
-          </details>
 
           <div class="sys">
             <p class="note">Игра автоматически сохраняется на этом устройстве каждые несколько секунд. В Telegram сохранение отдельно от обычного браузера.</p>
@@ -1122,6 +1157,9 @@ if (TG && TG.BackButton) {
 /* ================= constants & data ================= */
 const W = 320, H = 180, GROUND = 150;
 const ZONE_KILLS = 10, HP_G = 1.6, BOSS_HP = 6, GOLD_R = 0.06, CRIT_MULT = 5;
+const SAVE_VERSION = 6;           // версия формата сохранения: растёт вместе со списком MIGRATIONS
+const TEST_KEY = 'put-shinobi-test-v1', MODE_KEY = 'put-shinobi-mode';
+const TEST = { on: false, fromCopy: false, speed: 1 };   // тест идёт в отдельном сохранении; основное не читается и не пишется
 const KEY = 'put-shinobi-v1'; // единый ключ: существующие сохранения совместимы с обновлением 1.5
 const SYSTEM_REDUCE_MOTION = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
 function reduceEffectsEnabled() { return SYSTEM_REDUCE_MOTION || !!(S && S.settings && S.settings.reduceEffects); }
@@ -1139,6 +1177,8 @@ const BIOMES = [
   { name: 'Лунные руины',     sky: ['#120f2a', '#4a3a86'], stars: true,  orb: '#f3e9ff', orbR: 15, far: '#2a2352', near: '#171233', type: 'pillars', ground: '#201a44', line: '#8a76d6', pal: { c: '#7a5fc0', d: '#40307a', a: '#e0c8ff' } },
 ];
 
+// id союзников записаны в сохранениях, менять их нельзя: sora = Наруто, kaito = Тентен, ren = Саске, mina = Сакура,
+// akagi = Какаши, yuki = Хината, gendo = Итачи, tenma = Шикамару.
 const ALLIES = [
   { id: 'sora',  name: 'Наруто Узумаки', title: 'Будущий Хокагэ',       clan: 'Узумаки', style: 'Кагэ Буншин · Расэнган',        base: 50,      dps: 5,      pal: { c: '#e58a32', d: '#7d421e', a: '#e9e4d6' } },
   { id: 'kaito', name: 'Тентен',         title: 'Мастер оружия',         clan: 'Команда Гая',  style: 'Свитки · кунаи · сюрикэны',      base: 250,     dps: 22,     pal: { c: '#8c4b45', d: '#4c2b31', a: '#d9b54a' } },
@@ -1382,7 +1422,7 @@ function mix(a, b, t) { const A = hex(a), B = hex(b); return 'rgb(' + A.map((v, 
 
 /* ================= state ================= */
 function newState(starter) {
-  return { v: 5, gold: starter ? 50 : 0, zone: 1, kills: 0, maxZone: 1, bestEver: 1, auto: true, autoClick: true, settings: { reduceEffects: false }, trialClaims: [], rankTrialsVersion: 2, allyStoriesUnlocked: [], squadSlotsUnlocked: SQUAD_BASE_SLOTS, legendaryBossKills: 0,
+  return { v: SAVE_VERSION, gold: starter ? 50 : 0, zone: 1, kills: 0, maxZone: 1, bestEver: 1, auto: true, autoClick: true, settings: { reduceEffects: false }, trialClaims: [], rankTrialsVersion: 2, allyStoriesUnlocked: [], squadSlotsUnlocked: SQUAD_BASE_SLOTS, legendaryBossKills: 0,
     allies: ALLIES.map(() => 0), allyUnlocks: ALLIES.map((_, i) => i === 0), activeSquad: [], recruitedBosses: [], claimedBossZones: [], tap: { power: 0, combo: 0, swiftFlow: 0, chakraFlow: 0, squadTraining: 0, ironBody: 0, pressurePoint: 0, finisher: 0 }, eye: { insight: 0, foresight: 0, mirror: 0, mangekyo: 0, amaterasu: 0, kamui: 0, izanagi: 0, koto: 0 }, skillReadyAt: {}, sixPathsStacks: 0,
     points: 0, rebirths: 0, chakra: 100, seen: false, arenaTheme: 'default',
     homeReturns: 0, homeRewardZone: 1, eyePointsClaimed: 0, villageScrolls: 0, villageReputation: 0,
@@ -1390,6 +1430,10 @@ function newState(starter) {
     senjuTree: { vitality: 0, body: 0, ashura: 0, wood: 0 }, savedAt: Date.now() };
 }
 let S = newState(true);
+// Поля, которые переживают любой сброс похода: настройки, режимы и история аккаунта.
+// Новое постоянное поле достаточно добавить сюда, и оно не потеряется при возвращении в деревню и перерождении.
+const ACCOUNT_FIELDS = ['settings', 'auto', 'autoClick', 'seen', 'arenaTheme', 'bestEver', 'rebirths', 'homeReturns', 'legendaryBossKills', 'squadSlotsUnlocked', 'allyStoriesUnlocked'];
+function carryAccount(n) { ACCOUNT_FIELDS.forEach((k) => { if (S[k] !== undefined) n[k] = JSON.parse(JSON.stringify(S[k])); }); return n; }
 const R = { enemy: null, combo: 0, cd: { clone: 0, fox: 0, rasengan: 0, sage: 0, gamabunta: 0, delayed: 0, tailed: 0, sixpaths: 0 }, buff: { clone: 0, fox: 0, sage: 0, gamabunta: 0, delayed: 0, tailed: 0 },
   acc: 0, accT: 0, debuff: {}, shake: 0, lunge: 0, fx: [], parts: [], buyMode: '1', tab: 'allies', modalAlly: -1, modalBoss: -1, modalBossSig: '', modalLevel: -1, bossRosterSig: '', squadSig: '', bgIdx: -1, bg: null, t: 0, uiT: 0, saveT: 0 };
 
@@ -1625,77 +1669,148 @@ async function buyShopProduct(productId, button) {
 }
 
 
-function save() { try { S.savedAt = Date.now(); localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
-function load() {
+function save(force) {
   try {
-    const raw = localStorage.getItem(KEY); if (!raw) return false;
-    const o = JSON.parse(raw), d = newState(false);
-    S = Object.assign(d, o);
-    if (o.godMode) S.gold = Number.isFinite(+o.godGoldBackup) ? Math.max(0, +o.godGoldBackup) : 0;
-    delete S.godMode; delete S.godGoldBackup;
-    S.tap = Object.assign(d.tap, o.tap || {});
-    S.eye = Object.assign(d.eye, o.eye || {});
-    S.settings = Object.assign(d.settings, o.settings || {});
-    if (typeof S.settings.reduceEffects !== 'boolean') S.settings.reduceEffects = false;
-    // Миграция инвестиций версии 1.3: удалённые таланты добычи Рё переводятся в боевые навыки.
-    if (!S.tap.swiftFlow && o.tap && o.tap.goldClick) S.tap.swiftFlow = Math.min(20, Math.max(0, +o.tap.goldClick || 0));
-    if (!S.tap.squadTraining && o.tap && o.tap.share) S.tap.squadTraining = Math.min(20, Math.max(0, +o.tap.share || 0));
-    if (!S.eye.mangekyo && o.eye && o.eye.goldFind) S.eye.mangekyo = Math.min(10, Math.max(0, +o.eye.goldFind || 0));
-    delete S.tap.share; delete S.tap.goldClick; delete S.eye.goldFind;
-    S.skillReadyAt = Object.assign({}, d.skillReadyAt, o.skillReadyAt || {});
-    S.sixPathsStacks = Math.max(0, +o.sixPathsStacks || 0);
-    S.village = Object.assign(d.village, o.village || {});
-    S.senjuTree = Object.assign(d.senjuTree, o.senjuTree || {});
-    S.allies = ALLIES.map((_, i) => Math.max(0, +(o.allies && o.allies[i]) || 0));
-    const savedStoryIds = Array.isArray(o.allyStoriesUnlocked) ? o.allyStoriesUnlocked : [];
-    const hiredStoryIds = ALLIES.filter((a, i) => S.allies[i] > 0).map((a) => a.id);
-    S.allyStoriesUnlocked = Array.from(new Set(savedStoryIds.concat(hiredStoryIds).filter((id) => ALLIES.some((a) => a.id === id))));
-    S.allyUnlocks = Array.isArray(o.allyUnlocks)
-      ? ALLIES.map((_, i) => i === 0 || !!o.allyUnlocks[i])
-      : ALLIES.map((_, i) => i === 0);
-    S.allyUnlocks[0] = true;
-    // Migration: preserve access to every ally already owned in a prior version.
-    const highestOwnedAlly = S.allies.reduce((last, level, i) => level > 0 ? Math.max(last, i) : last, 0);
-    for (let i = 0; i <= highestOwnedAlly; i++) S.allyUnlocks[i] = true;
-    if (Array.isArray(o.activeSquad)) {
-      S.activeSquad = o.activeSquad.filter((id, i, arr) => ALLIES.some((a, j) => a.id === id && S.allies[j] > 0) && arr.indexOf(id) === i).slice(0, SQUAD_LIMIT);
-    } else {
-      // Миграция старого сохранения: приоритет — команда №7, затем остальные нанятые герои.
-      const priority = ['sora', 'ren', 'mina', 'akagi'];
-      const ownedIds = ALLIES.filter((a, i) => S.allies[i] > 0).map((a) => a.id);
-      S.activeSquad = priority.filter((id) => ownedIds.includes(id));
-      ownedIds.forEach((id) => { if (!S.activeSquad.includes(id) && S.activeSquad.length < SQUAD_BASE_SLOTS) S.activeSquad.push(id); });
-    }
-    const bossIds = new Set(SPECIAL_BOSSES.map((b) => b.id));
-    S.recruitedBosses = Array.isArray(o.recruitedBosses) ? o.recruitedBosses.filter((b) => b && bossIds.has(b.id) && Number.isFinite(+b.zone) && Number.isFinite(+b.dps)).map((b) => ({ id: b.id, zone: Math.max(100, +b.zone | 0), dps: Math.max(0, +b.dps) })) : [];
-    S.claimedBossZones = Array.isArray(o.claimedBossZones) ? o.claimedBossZones.map((z) => +z).filter((z) => Number.isFinite(z) && z >= 100 && z % 100 === 0) : [];
-    S.recruitedBosses.forEach((b) => { if (!S.claimedBossZones.includes(b.zone)) S.claimedBossZones.push(b.zone); });
-    // Старые сохранения: считаем уже побеждённых легендарных боссов по их зонам и записям спутников.
-    const provenLegendaryZones = new Set([...(S.claimedBossZones || []), ...(S.recruitedBosses || []).map((b) => b.zone)]);
-    const savedLegendaryKills = Math.max(0, Math.floor(Number.isFinite(+o.legendaryBossKills) ? +o.legendaryBossKills : 0));
-    S.legendaryBossKills = Math.min(SQUAD_LIMIT - SQUAD_BASE_SLOTS, Math.max(savedLegendaryKills, provenLegendaryZones.size));
-    S.squadSlotsUnlocked = Math.min(SQUAD_LIMIT, SQUAD_BASE_SLOTS + S.legendaryBossKills);
-    S.activeSquad = S.activeSquad.slice(0, S.squadSlotsUnlocked);
-    ['gold', 'zone', 'kills', 'maxZone', 'bestEver', 'points', 'rebirths', 'chakra', 'homeReturns', 'homeRewardZone', 'eyePointsClaimed', 'villageScrolls', 'villageReputation', 'senjuPoints', 'senjuConverted', 'senjuProgress'].forEach((k) => { if (!isFinite(S[k])) S[k] = d[k]; });
-    S.homeReturns = Math.max(0, S.homeReturns | 0); S.homeRewardZone = Math.max(1, S.homeRewardZone | 0);
-    S.eyePointsClaimed = Math.max(0, S.eyePointsClaimed | 0);
-    S.villageScrolls = Math.max(0, S.villageScrolls | 0); S.villageReputation = Math.max(0, S.villageReputation | 0);
-    S.senjuPoints = Math.max(0, S.senjuPoints | 0); S.senjuConverted = Math.max(0, S.senjuConverted | 0); S.senjuProgress = Math.max(0, S.senjuProgress | 0);
-    Object.keys(S.village).forEach((k) => { S.village[k] = Math.max(0, Math.min((VILLAGE_BUILDINGS.find((b) => b.id === k) || {max:0}).max, +S.village[k] || 0)); });
-    Object.keys(S.senjuTree).forEach((k) => { S.senjuTree[k] = Math.max(0, Math.min((SENJU_NODES.find((b) => b.id === k) || {max:0}).max, +S.senjuTree[k] || 0)); });
-    S.zone = Math.max(1, S.zone | 0);
-    if (typeof S.autoClick !== 'boolean') S.autoClick = true;
-    if (!S.skillReadyAt || typeof S.skillReadyAt !== 'object') S.skillReadyAt = {};
-    Object.keys(S.skillReadyAt).forEach((k) => { const v = +S.skillReadyAt[k]; if (!Number.isFinite(v) || v < 0) delete S.skillReadyAt[k]; else S.skillReadyAt[k] = v; });
-    if (!Number.isFinite(S.sixPathsStacks) || S.sixPathsStacks < 0) S.sixPathsStacks = 0; S.sixPathsStacks = Math.min(10, Math.floor(S.sixPathsStacks));
-    if (!Array.isArray(S.trialClaims)) S.trialClaims = [];
-    // Версия 2: этапы ранга перенесены на уровни 50/100/250/500/1000.
-    // Старые отметки 5/10/15/20/25 не должны автоматически засчитываться за новые этапы.
-    if (o.rankTrialsVersion !== 2) S.trialClaims = [];
-    S.rankTrialsVersion = 2;
-    if (!['default', 'moon', 'dunes', 'ruins'].includes(S.arenaTheme)) S.arenaTheme = 'default';
-    return true;
-  } catch (e) { return false; }
+    S.savedAt = Date.now();
+    const json = JSON.stringify(S);
+    localStorage.setItem(TEST.on ? TEST_KEY : KEY, json);
+    if (!TEST.on) cloudMaybe(json, force === true);
+  } catch (e) {}
+}
+/* ---- облачное сохранение Telegram (CloudStorage, значение до 4096 символов: делим на части) ---- */
+const CLOUD_CHUNK = 3500;
+let cloudAt = 0, cloudReady = false, cloudParts = 0, cloudLast = '';
+function cloudAvailable() { try { return !!(TG && TG.CloudStorage && TG.isVersionAtLeast && TG.isVersionAtLeast('6.9') && TG.initData); } catch (e) { return false; } }
+function cloudMaybe(json, force) {
+  if (!cloudReady || TEST.on || !cloudAvailable()) return;
+  const now = Date.now();
+  if (json === cloudLast.slice(0) || (!force && now - cloudAt < 30000)) return;
+  cloudAt = now; cloudLast = json;
+  const n = Math.ceil(json.length / CLOUD_CHUNK), cs = TG.CloudStorage;
+  try {
+    for (let i = 0; i < n; i++) cs.setItem('save_' + i, json.slice(i * CLOUD_CHUNK, (i + 1) * CLOUD_CHUNK), () => {});
+    cs.setItem('save_meta', JSON.stringify({ n, t: S.savedAt, v: SAVE_VERSION }), () => {});
+    if (cloudParts > n) { const extra = []; for (let i = n; i < cloudParts; i++) extra.push('save_' + i); cs.removeItems(extra, () => {}); }
+    cloudParts = n;
+  } catch (e) {}
+}
+function cloudPull(hadLocal) {
+  if (!cloudAvailable() || TEST.on) return;
+  const cs = TG.CloudStorage, done = () => { cloudReady = true; cloudMaybe(JSON.stringify(S), true); };
+  try {
+    cs.getItem('save_meta', (err, val) => {
+      let meta = null; try { meta = val ? JSON.parse(val) : null; } catch (e) {}
+      if (err || !meta || !(meta.n > 0) || TEST.on) { done(); return; }
+      cloudParts = meta.n;
+      const keys = []; for (let i = 0; i < meta.n; i++) keys.push('save_' + i);
+      cs.getItems(keys, (err2, map) => {
+        let o = null;
+        try { if (!err2) o = JSON.parse(keys.map((k) => (map && map[k]) || '').join('')); } catch (e) {}
+        if (o && !TEST.on && (!hadLocal || (+meta.t || 0) > (+S.savedAt || 0) + 2000)) {
+          hydrate(o); clearRuntimeKeepState(); spawn(); syncMenuSettings(); applyVisualSettings(); updateUI(true);
+          toast('Прогресс загружен из облака Telegram'); save();
+        }
+        done();
+      });
+    });
+  } catch (e) {}
+}
+function clearRuntimeKeepState() {
+  R.buff = { clone: 0, fox: 0, sage: 0, gamabunta: 0, delayed: 0, tailed: 0 };
+  R.cd = { clone: 0, fox: 0, rasengan: 0, sage: 0, gamabunta: 0, delayed: 0, tailed: 0, sixpaths: 0 };
+  R.debuff = {}; R.combo = 0; R.acc = 0; R.accT = 0; R.autoAcc = 0; R.bossRosterSig = ''; R.squadSig = '';
+  restoreTechniqueCooldowns();
+}
+// Миграции: каждая меняет сырой объект сохранения и идемпотентна. Новое изменение формата — новая запись с to = SAVE_VERSION + 1.
+const MIGRATIONS = [
+  { to: 6, name: 'накопленные правки до версии 2.6', run(o) {
+    o.tap = o.tap || {}; o.eye = o.eye || {};
+    // 1.3: таланты добычи Рё переведены в боевые навыки.
+    if (!o.tap.swiftFlow && o.tap.goldClick) o.tap.swiftFlow = Math.min(20, Math.max(0, +o.tap.goldClick || 0));
+    if (!o.tap.squadTraining && o.tap.share) o.tap.squadTraining = Math.min(20, Math.max(0, +o.tap.share || 0));
+    if (!o.eye.mangekyo && o.eye.goldFind) o.eye.mangekyo = Math.min(10, Math.max(0, +o.eye.goldFind || 0));
+    delete o.tap.share; delete o.tap.goldClick; delete o.eye.goldFind;
+    // Режим бога удалён: возвращаем золото, накопленное до него.
+    if (o.godMode) o.gold = Number.isFinite(+o.godGoldBackup) ? Math.max(0, +o.godGoldBackup) : 0;
+    delete o.godMode; delete o.godGoldBackup;
+    // Этапы ранга перенесены на уровни 50/100/250/500/1000: старые отметки не засчитываются.
+    if (o.rankTrialsVersion !== 2) o.trialClaims = [];
+    o.rankTrialsVersion = 2;
+  } }
+];
+function migrate(o) {
+  const from = Math.max(0, Math.floor(+o.v) || 0);
+  MIGRATIONS.filter((m) => m.to > from).sort((a, b) => a.to - b.to).forEach((m) => m.run(o));
+  o.v = SAVE_VERSION;
+  return o;
+}
+// hydrate: всегда выполняемая проверка и нормализация (списки союзников и боссов могут меняться между версиями).
+function hydrate(raw) {
+  const o = migrate(raw), d = newState(false);
+  S = Object.assign(d, o);
+  S.tap = Object.assign(d.tap, o.tap || {});
+  S.eye = Object.assign(d.eye, o.eye || {});
+  S.settings = Object.assign(d.settings, o.settings || {});
+  if (typeof S.settings.reduceEffects !== 'boolean') S.settings.reduceEffects = false;
+  S.skillReadyAt = Object.assign({}, d.skillReadyAt, o.skillReadyAt || {});
+  S.sixPathsStacks = Math.max(0, +o.sixPathsStacks || 0);
+  S.village = Object.assign(d.village, o.village || {});
+  S.senjuTree = Object.assign(d.senjuTree, o.senjuTree || {});
+  S.allies = ALLIES.map((_, i) => Math.max(0, +(o.allies && o.allies[i]) || 0));
+  const savedStoryIds = Array.isArray(o.allyStoriesUnlocked) ? o.allyStoriesUnlocked : [];
+  const hiredStoryIds = ALLIES.filter((a, i) => S.allies[i] > 0).map((a) => a.id);
+  S.allyStoriesUnlocked = Array.from(new Set(savedStoryIds.concat(hiredStoryIds).filter((id) => ALLIES.some((a) => a.id === id))));
+  S.allyUnlocks = Array.isArray(o.allyUnlocks)
+    ? ALLIES.map((_, i) => i === 0 || !!o.allyUnlocks[i])
+    : ALLIES.map((_, i) => i === 0);
+  S.allyUnlocks[0] = true;
+  // Migration: preserve access to every ally already owned in a prior version.
+  const highestOwnedAlly = S.allies.reduce((last, level, i) => level > 0 ? Math.max(last, i) : last, 0);
+  for (let i = 0; i <= highestOwnedAlly; i++) S.allyUnlocks[i] = true;
+  if (Array.isArray(o.activeSquad)) {
+    S.activeSquad = o.activeSquad.filter((id, i, arr) => ALLIES.some((a, j) => a.id === id && S.allies[j] > 0) && arr.indexOf(id) === i).slice(0, SQUAD_LIMIT);
+  } else {
+    // Миграция старого сохранения: приоритет — команда №7, затем остальные нанятые герои.
+    const priority = ['sora', 'ren', 'mina', 'akagi'];
+    const ownedIds = ALLIES.filter((a, i) => S.allies[i] > 0).map((a) => a.id);
+    S.activeSquad = priority.filter((id) => ownedIds.includes(id));
+    ownedIds.forEach((id) => { if (!S.activeSquad.includes(id) && S.activeSquad.length < SQUAD_BASE_SLOTS) S.activeSquad.push(id); });
+  }
+  const bossIds = new Set(SPECIAL_BOSSES.map((b) => b.id));
+  S.recruitedBosses = Array.isArray(o.recruitedBosses) ? o.recruitedBosses.filter((b) => b && bossIds.has(b.id) && Number.isFinite(+b.zone) && Number.isFinite(+b.dps)).map((b) => ({ id: b.id, zone: Math.max(100, +b.zone | 0), dps: Math.max(0, +b.dps) })) : [];
+  S.claimedBossZones = Array.isArray(o.claimedBossZones) ? o.claimedBossZones.map((z) => +z).filter((z) => Number.isFinite(z) && z >= 100 && z % 100 === 0) : [];
+  S.recruitedBosses.forEach((b) => { if (!S.claimedBossZones.includes(b.zone)) S.claimedBossZones.push(b.zone); });
+  // Старые сохранения: считаем уже побеждённых легендарных боссов по их зонам и записям спутников.
+  const provenLegendaryZones = new Set([...(S.claimedBossZones || []), ...(S.recruitedBosses || []).map((b) => b.zone)]);
+  const savedLegendaryKills = Math.max(0, Math.floor(Number.isFinite(+o.legendaryBossKills) ? +o.legendaryBossKills : 0));
+  S.legendaryBossKills = Math.min(SQUAD_LIMIT - SQUAD_BASE_SLOTS, Math.max(savedLegendaryKills, provenLegendaryZones.size));
+  S.squadSlotsUnlocked = Math.min(SQUAD_LIMIT, SQUAD_BASE_SLOTS + S.legendaryBossKills);
+  S.activeSquad = S.activeSquad.slice(0, S.squadSlotsUnlocked);
+  ['gold', 'zone', 'kills', 'maxZone', 'bestEver', 'points', 'rebirths', 'chakra', 'homeReturns', 'homeRewardZone', 'eyePointsClaimed', 'villageScrolls', 'villageReputation', 'senjuPoints', 'senjuConverted', 'senjuProgress'].forEach((k) => { if (!isFinite(S[k])) S[k] = d[k]; });
+  S.homeReturns = Math.max(0, S.homeReturns | 0); S.homeRewardZone = Math.max(1, S.homeRewardZone | 0);
+  S.eyePointsClaimed = Math.max(0, S.eyePointsClaimed | 0);
+  S.villageScrolls = Math.max(0, S.villageScrolls | 0); S.villageReputation = Math.max(0, S.villageReputation | 0);
+  S.senjuPoints = Math.max(0, S.senjuPoints | 0); S.senjuConverted = Math.max(0, S.senjuConverted | 0); S.senjuProgress = Math.max(0, S.senjuProgress | 0);
+  Object.keys(S.village).forEach((k) => { S.village[k] = Math.max(0, Math.min((VILLAGE_BUILDINGS.find((b) => b.id === k) || {max:0}).max, +S.village[k] || 0)); });
+  Object.keys(S.senjuTree).forEach((k) => { S.senjuTree[k] = Math.max(0, Math.min((SENJU_NODES.find((b) => b.id === k) || {max:0}).max, +S.senjuTree[k] || 0)); });
+  S.zone = Math.max(1, S.zone | 0);
+  if (typeof S.autoClick !== 'boolean') S.autoClick = true;
+  if (!S.skillReadyAt || typeof S.skillReadyAt !== 'object') S.skillReadyAt = {};
+  Object.keys(S.skillReadyAt).forEach((k) => { const v = +S.skillReadyAt[k]; if (!Number.isFinite(v) || v < 0) delete S.skillReadyAt[k]; else S.skillReadyAt[k] = v; });
+  if (!Number.isFinite(S.sixPathsStacks) || S.sixPathsStacks < 0) S.sixPathsStacks = 0; S.sixPathsStacks = Math.min(10, Math.floor(S.sixPathsStacks));
+  if (!['default', 'moon', 'dunes', 'ruins'].includes(S.arenaTheme)) S.arenaTheme = 'default';
+  if (!Array.isArray(S.trialClaims)) S.trialClaims = [];
+  S.rankTrialsVersion = 2;
+}
+function load(key) {
+  let raw = null;
+  try {
+    raw = localStorage.getItem(key || KEY); if (!raw) return false;
+    hydrate(JSON.parse(raw)); return true;
+  } catch (e) {
+    try { if (raw) localStorage.setItem((key || KEY) + '-corrupt', raw); } catch (e2) {}   // повреждённое сохранение не теряется молча
+    return false;
+  }
 }
 
 /* ================= formulas ================= */
@@ -1997,7 +2112,7 @@ function sprite(kind, key, pal) {
   const k = kind + '|' + key;
   let c = spriteCache.get(k);
   if (c) return c;
-  c = (kind === 'ninja' && CHARACTER_VISUALS[key]) ? paintCharacterPortrait(key, pal) : paintSprite(kind, pal);
+  c = (kind === 'ninja' && CHARACTER_VISUALS[key]) ? paintCharacterPortrait(key, pal) : (kind === 'ninja' && ENEMY_ART[key]) ? paintEnemyPortrait(key) : paintSprite(kind, pal);
   spriteCache.set(k, c);
   return c;
 }
@@ -2178,6 +2293,463 @@ function eyeNaruto(g, x, y, side, fox, sage, blink, t) {
   g.restore();
 }
 
+/* ================= враги: узнаваемые противники (векторная отрисовка в стиле героя) ================= */
+// Все персонажи нарисованы лицом вправо в тех же пропорциях, что и герой; при выводе зеркалятся к игроку.
+// Начало координат — между ступнями. o: t (сек), atk 0..1 (атака босса), calm (без анимации).
+const ENEMY_ART = {};
+const ENEMY_BY_NAME = {
+  'Момочи Забуза': 'zabuza', 'Хаку': 'haku', 'Орочимару': 'orochimaru', 'Гаара': 'gaara', 'Дейдара': 'deidara', 'Сасори': 'sasori',
+  'Кисаме Хошигаки': 'kisame', 'Какузу': 'kakuzu', 'Конан': 'konan', 'Пэйн (Нагато)': 'pain', 'Обито Учиха': 'obito',
+  'Мадара Учиха': 'madara', 'Кагуя Ооцуцуки': 'kaguya', 'Хидан': 'hidan'
+};
+function enemyArtKey(e) { return ENEMY_BY_NAME[e.name] || (e.boss ? 'oni' : e.kind); }
+const INK = '#1b1220';
+function eSkin(c) { return { a: c, b: mix(c, '#7a4a30', 0.22) }; }
+function eHead(g, sk) {
+  g.beginPath(); g.moveTo(-14, -6); g.bezierCurveTo(-15, 8, -9, 15, 0, 15); g.bezierCurveTo(9, 15, 15, 8, 14, -6); g.bezierCurveTo(12, -13, -12, -13, -14, -6); g.closePath();
+  const fg = g.createLinearGradient(0, -12, 0, 15); fg.addColorStop(0, sk.a); fg.addColorStop(1, sk.b); hFill(g, fg, INK, 0.9);
+  hEllipse(g, -14.5, 3, 2.2, 3.2, sk.a, INK, 0.8); hEllipse(g, 14.5, 3, 2.2, 3.2, sk.a, INK, 0.8);
+}
+function eEye(g, x, y, k) {                                 // k: {sc, iris, pupil:'round'|'slit'|'ring'|'tomoe'|'dot', r}
+  g.save(); g.translate(x, y);
+  const r = k.r || 3.2;
+  g.beginPath(); g.ellipse(0, 0, r + 0.5, r * 0.95, 0, 0, 7); g.fillStyle = k.sc || '#fff'; g.fill(); g.lineWidth = 0.8; g.strokeStyle = INK; g.stroke();
+  if (k.pupil === 'none') { g.restore(); return; }
+  g.beginPath(); g.ellipse(0, 0.2, r * 0.72, r * 0.85, 0, 0, 7); g.fillStyle = k.iris || '#333'; g.fill();
+  if (k.pupil === 'slit') { g.beginPath(); g.ellipse(0, 0, 0.7, r * 0.8, 0, 0, 7); g.fillStyle = INK; g.fill(); }
+  else if (k.pupil === 'ring') { g.strokeStyle = 'rgba(70,40,120,.9)'; g.lineWidth = 0.55; for (let i = 1; i <= 3; i++) { g.beginPath(); g.arc(0, 0.2, r * 0.18 * i + 0.3, 0, 7); g.stroke(); } }
+  else if (k.pupil === 'tomoe') { g.fillStyle = INK; g.beginPath(); g.arc(0, 0.2, 0.9, 0, 7); g.fill(); for (let i = 0; i < 3; i++) { const a = i * 2.094 - 1.57; g.beginPath(); g.arc(Math.cos(a) * r * 0.5, 0.2 + Math.sin(a) * r * 0.5, 0.75, 0, 7); g.fill(); } }
+  else if (k.pupil === 'dot') { g.beginPath(); g.arc(0, 0.2, r * 0.3, 0, 7); g.fillStyle = INK; g.fill(); }
+  else { g.beginPath(); g.ellipse(0, 0.3, r * 0.4, r * 0.55, 0, 0, 7); g.fillStyle = INK; g.fill(); }
+  g.beginPath(); g.arc(-0.8, -1.2, 0.8, 0, 7); g.fillStyle = 'rgba(255,255,255,.85)'; g.fill();
+  g.restore();
+}
+function eLegs(g, o, c1, c2, shoe, wrap) {
+  const st = (o.atk || 0) * 2;
+  hRound(g, -11 - st, -28, 10, 22, 3, c1, INK, 0.9); hRound(g, 1 + st, -28, 10, 22, 3, c2 || c1, INK, 0.9);
+  if (wrap) { g.fillStyle = wrap; hRound(g, -11 - st, -16, 10, 5, 1.5, wrap, INK, 0.6); hRound(g, 1 + st, -16, 10, 5, 1.5, wrap, INK, 0.6); }
+  hRound(g, -13 - st, -6, 14, 6, 3, shoe, INK, 0.9); hRound(g, 0 + st, -6, 14, 6, 3, shoe, INK, 0.9);
+}
+function eTorso(g, o, c1, c2, trim, br) {
+  hPath(g, [[-12, -50 + br], [12, -50 + br], [13, -27], [-13, -27]]);
+  const tg = g.createLinearGradient(-12, -50, 12, -27); tg.addColorStop(0, mix(c1, '#ffffff', 0.18)); tg.addColorStop(0.5, c1); tg.addColorStop(1, c2); hFill(g, tg, INK, 0.9);
+  if (trim) { hRound(g, -13, -29, 26, 4, 1.5, trim, INK, 0.8); }
+}
+function eArm(g, x, y, ang, len, sleeve, hand, cuff) {
+  g.save(); g.translate(x, y); g.rotate(ang);
+  hRound(g, -4, 0, 8, len, 4, sleeve, INK, 0.9);
+  if (cuff) hRound(g, -4.4, len - 5, 8.8, 5, 2, cuff, INK, 0.7);
+  hEllipse(g, 0, len + 2, 4.4, 4.4, hand, INK, 0.9);
+  g.restore();
+}
+/* Общая сборка: spec = { skin, legs:[c1,c2,shoe,wrap], torso:[c1,c2,trim], sleeve, cuff, back(g,o), body(g,o,br) — вместо торса и ног, head(g,o,sk), front(g,o) } */
+function drawChar(g, o, s) {
+  const t = o.t, br = o.calm ? 0 : Math.sin(t * 3.1) * 0.7, atk = o.atk || 0, sk = eSkin(s.skin);
+  g.save();
+  if (s.back) { g.save(); s.back(g, o); g.restore(); }
+  eArm(g, -9 - atk * 2, -49 + br, 0.35 - atk * 0.2, 18, s.sleeve || s.torso[0], sk.a, s.cuff);
+  if (s.body) s.body(g, o, br); else { eLegs(g, o, s.legs[0], s.legs[1], s.legs[2], s.legs[3]); eTorso(g, o, s.torso[0], s.torso[1], s.torso[2], br); }
+  if (s.torsoFront) s.torsoFront(g, o, br);
+  eArm(g, 10, -49 + br, -0.7 - atk * 1.1, 17 + atk * 3, s.sleeve || s.torso[0], sk.a, s.cuff);
+  g.save(); g.translate(atk * 4, -66 + br * 0.6); s.head(g, o, sk); g.restore();
+  if (s.front) { g.save(); s.front(g, o); g.restore(); }
+  g.restore();
+}
+function eSpikes(g, pts, c, dark) {
+  hPath(g, pts); const hg = g.createLinearGradient(0, -34, 0, 4); hg.addColorStop(0, mix(c, '#ffffff', 0.22)); hg.addColorStop(0.5, c); hg.addColorStop(1, dark || mix(c, '#000000', 0.35)); hFill(g, hg, INK, 0.9);
+}
+function akatsuki(g, o, br, opts) {                          // плащ Акацуки: тёмный, красные облака, высокий воротник
+  opts = opts || {};
+  hPath(g, [[-13, -52 + br], [13, -52 + br], [19, -30], [21, -4], [-21, -4], [-19, -30]]);
+  const cg = g.createLinearGradient(0, -52, 0, -4); cg.addColorStop(0, '#2b2540'); cg.addColorStop(1, '#0e0b18'); hFill(g, cg, INK, 0.9);
+  if (opts.open) { hPath(g, [[-4, -50 + br], [4, -50 + br], [2, -8], [-2, -8]]); hFill(g, opts.inner || '#e9cdb0', INK, 0.7); }
+  const clouds = [[-13, -18], [12, -30], [-6, -36]];
+  clouds.forEach((c) => { g.fillStyle = '#d6283a'; g.strokeStyle = '#f6ece0'; g.lineWidth = 0.8; for (let i = 0; i < 3; i++) { g.beginPath(); g.arc(c[0] + i * 3.2 - 3, c[1] + (i === 1 ? -1.5 : 0.6), 2.4, 0, 7); g.fill(); g.stroke(); } });
+  g.strokeStyle = '#f6ece0'; g.lineWidth = 0.7; g.beginPath(); g.moveTo(-20, -4); g.lineTo(20, -4); g.stroke();
+}
+function akatsukiCollar(g, br, hood) {
+  hPath(g, [[-15, -49 + br], [-13, -60 + br], [-6, -63 + br], [-3, -52 + br]]); hFill(g, '#1a1528', INK, 0.8);
+  hPath(g, [[15, -49 + br], [13, -60 + br], [6, -63 + br], [3, -52 + br]]); hFill(g, '#1a1528', INK, 0.8);
+  g.strokeStyle = '#d6283a'; g.lineWidth = 0.9; g.beginPath(); g.moveTo(-6, -62 + br); g.lineTo(-3, -52 + br); g.moveTo(6, -62 + br); g.lineTo(3, -52 + br); g.stroke();
+}
+function akaArms(sk) { return { sleeve: '#1c1730', cuff: '#d6283a' }; }
+function brow(g, y, c, w) { g.strokeStyle = c || INK; g.lineWidth = w || 1.4; g.lineCap = 'round'; g.beginPath(); g.moveTo(-10, y - 0.6); g.lineTo(-3.4, y + 0.4); g.stroke(); g.beginPath(); g.moveTo(10, y - 0.6); g.lineTo(3.4, y + 0.4); g.stroke(); }
+function mouth(g, y, w, grin) { g.strokeStyle = INK; g.lineWidth = 0.9; g.beginPath(); g.moveTo(-w, y); g.quadraticCurveTo(0, y + (grin ? 4 : 1.5), w, y); g.stroke(); }
+
+/* --- Забуза: бинты на лице, огромный меч Кубикирибочо --- */
+ENEMY_ART.zabuza = (g, o) => drawChar(g, o, {
+  skin: '#dcae86', legs: ['#3b4560', '#323b54', '#2a2f40', '#e6dfcb'], torso: ['#cdb08a', '#a98c68', '#2f3a55'], sleeve: '#394666', cuff: '#e6dfcb',
+  back(g) {
+    g.save(); g.translate(-6, -40); g.rotate(-0.55);
+    hRound(g, -2.2, -4, 4.4, 30, 2, '#5a4636', INK, 0.8);
+    hPath(g, [[-8, -4], [8, -4], [10, -74], [-1, -80], [-9, -70]]); const bg = g.createLinearGradient(-8, 0, 10, 0); bg.addColorStop(0, '#dfe6f2'); bg.addColorStop(1, '#8794ac'); hFill(g, bg, INK, 1);
+    hEllipse(g, 0.5, -60, 2.6, 2.6, '#23273a', INK, 0.8);
+    g.restore();
+  },
+  torsoFront(g, o, br) { g.strokeStyle = '#e6dfcb'; g.lineWidth = 1.6; for (let i = 0; i < 4; i++) { g.beginPath(); g.moveTo(-12, -47 + i * 5 + br); g.lineTo(12, -44 + i * 5 + br); g.stroke(); } },
+  head(g, o, sk) {
+    eSpikes(g, [[-15, -4], [-19, -14], [-13, -12], [-14, -23], [-6, -17], [-2, -27], [3, -18], [9, -25], [12, -15], [18, -17], [15, -4]], '#23252f');
+    eHead(g, sk);
+    brow(g, -4.5, INK, 1.8); eEye(g, -6.4, 0.3, { iris: '#3a2a1a', pupil: 'dot', r: 2.8 }); eEye(g, 6.4, 0.3, { iris: '#3a2a1a', pupil: 'dot', r: 2.8 });
+    hPath(g, [[-14, 3.5], [14, 3.5], [13, 12], [0, 17], [-13, 12]]); hFill(g, '#ece6d6', INK, 0.9);                    // бинтовая маска
+    g.strokeStyle = 'rgba(120,100,80,.55)'; g.lineWidth = 0.6; for (let i = 0; i < 4; i++) { g.beginPath(); g.moveTo(-13, 5.5 + i * 2.6); g.lineTo(13, 6.5 + i * 2.6); g.stroke(); }
+    hPath(g, [[-15, -9.5], [15, -9.5], [15.5, -3.5], [-15.5, -3.5]]); hFill(g, '#3a4a6e', INK, 0.9); hRound(g, -8.5, -10.4, 17, 7, 1.6, '#aab4c8', INK, 0.9);
+    g.strokeStyle = INK; g.lineWidth = 0.9; g.beginPath(); g.moveTo(-6, -9); g.lineTo(6, -4.4); g.stroke();                // знак Кири с зачёркиванием
+  }
+});
+/* --- Хаку: белая маска охотника, длинные волосы, ледяные иглы --- */
+ENEMY_ART.haku = (g, o) => drawChar(g, o, {
+  skin: '#f3d6bc', legs: ['#cfe0e8', '#bcd2dc', '#7e93a8'], torso: ['#e6f1f4', '#b8d3de', '#6f93ad'], sleeve: '#e2eef2', cuff: '#6f93ad',
+  back(g, o) {
+    hPath(g, [[-14, -78], [14, -78], [18, -40], [10, -22], [-8, -22], [-18, -42]]); hFill(g, '#1d2030', INK, 0.9);
+    g.save(); g.globalCompositeOperation = 'lighter';
+    for (let i = 0; i < 5; i++) { const a = o.t * 1.4 + i * 1.26, x = Math.cos(a) * 30, y = -52 + Math.sin(a * 1.3) * 22; g.save(); g.translate(x, y); g.rotate(a); g.fillStyle = 'rgba(190,235,255,.85)'; hPath(g, [[-6, 0], [6, 0], [0, -1.4]], true); g.fill(); g.restore(); }
+    g.restore();
+  },
+  torsoFront(g, o, br) { hRound(g, -13, -33, 26, 5, 1.5, '#6f93ad', INK, 0.8); },
+  head(g, o, sk) {
+    eSpikes(g, [[-15, -4], [-17, -17], [-9, -23], [0, -26], [9, -23], [17, -17], [15, -4], [10, -10], [0, -13], [-10, -10]], '#20233a');
+    eHead(g, sk);
+    hPath(g, [[-14, -9], [14, -9], [14.5, 6], [8, 14], [0, 16], [-8, 14], [-14.5, 6]]); hFill(g, '#f6f2ec', INK, 0.9);        // маска охотника
+    g.fillStyle = INK; g.beginPath(); g.ellipse(-6, 0, 3.2, 1.2, 0.1, 0, 7); g.fill(); g.beginPath(); g.ellipse(6, 0, 3.2, 1.2, -0.1, 0, 7); g.fill();
+    g.strokeStyle = '#c43a3a'; g.lineWidth = 1.2; g.lineCap = 'round'; g.beginPath(); g.moveTo(0, -9); g.lineTo(0, -3); g.moveTo(-8, 8); g.quadraticCurveTo(-4, 11, 0, 9); g.moveTo(8, 8); g.quadraticCurveTo(4, 11, 0, 9); g.stroke();
+    g.fillStyle = '#c43a3a'; g.beginPath(); g.arc(0, 5, 1.2, 0, 7); g.fill();
+    eSpikes(g, [[-14, -8], [-8, -12], [-2, -9], [-6, 4], [-12, 1]], '#20233a'); eSpikes(g, [[14, -8], [8, -12], [2, -9], [6, 4], [12, 1]], '#20233a');
+  }
+});
+/* --- Орочимару: бледный, чёрные волосы, фиолетовые тени, змея --- */
+ENEMY_ART.orochimaru = (g, o) => drawChar(g, o, {
+  skin: '#efe6d6', legs: ['#d8d0be', '#c9c0ac', '#6e6475'], torso: ['#e4dcc9', '#bfb59d', '#7a3f98'], sleeve: '#e0d8c4', cuff: '#7a3f98',
+  back(g, o) {
+    g.save(); g.lineCap = 'round'; g.lineJoin = 'round';
+    for (const [w, c] of [[9, INK], [7, '#e8e4d8']]) { g.strokeStyle = c; g.lineWidth = w; g.beginPath(); g.moveTo(-14, -8); g.bezierCurveTo(-34, -20 + Math.sin(o.t * 2) * 3, -10, -44, -26, -70 + Math.sin(o.t * 2.6) * 4); g.stroke(); }
+    hEllipse(g, -26, -73 + Math.sin(o.t * 2.6) * 4, 6, 4.5, '#e8e4d8', INK, 0.9, -0.6); g.fillStyle = '#d4a017'; g.beginPath(); g.arc(-24, -74 + Math.sin(o.t * 2.6) * 4, 1, 0, 7); g.fill();
+    g.strokeStyle = '#c43a3a'; g.lineWidth = 0.8; g.beginPath(); g.moveTo(-31, -71); g.lineTo(-37, -69); g.stroke();
+    g.restore();
+    hPath(g, [[-14, -78], [14, -78], [19, -36], [12, -6], [-12, -6], [-20, -38]]); hFill(g, '#14101c', INK, 0.9);
+  },
+  torsoFront(g, o, br) { hRound(g, -13, -32, 26, 5, 2, '#7a3f98', INK, 0.9); g.strokeStyle = '#7a3f98'; g.lineWidth = 2; g.beginPath(); g.moveTo(8, -31); g.quadraticCurveTo(18, -26, 14, -14); g.stroke(); },
+  head(g, o, sk) {
+    eSpikes(g, [[-15, -4], [-17, -15], [-9, -22], [0, -24], [9, -22], [17, -15], [15, -4], [8, -10], [0, -12], [-8, -10]], '#14101c');
+    eHead(g, sk);
+    g.fillStyle = '#8a3aa0'; g.globalAlpha = 0.85; g.beginPath(); g.ellipse(-6.4, 0, 5.4, 3.2, 0, 0, 7); g.fill(); g.beginPath(); g.ellipse(6.4, 0, 5.4, 3.2, 0, 0, 7); g.fill(); g.globalAlpha = 1;
+    eEye(g, -6.4, 0.3, { sc: '#f4e9a6', iris: '#e0c030', pupil: 'slit', r: 2.8 }); eEye(g, 6.4, 0.3, { sc: '#f4e9a6', iris: '#e0c030', pupil: 'slit', r: 2.8 });
+    mouth(g, 10.5, 4, false); g.strokeStyle = '#c43a8a'; g.lineWidth = 0.7; g.beginPath(); g.moveTo(-4, 10.5); g.lineTo(4, 10.5); g.stroke();
+    eSpikes(g, [[-15, -9], [-7, -12], [-3, -6], [-9, 14], [-18, 18], [-17, 0]], '#14101c'); eSpikes(g, [[15, -9], [7, -12], [3, -6], [9, 14], [18, 18], [17, 0]], '#14101c');
+  }
+});
+/* --- Гаара: красные волосы, «любовь» на лбу, тыква с песком --- */
+ENEMY_ART.gaara = (g, o) => drawChar(g, o, {
+  skin: '#f1d1b0', legs: ['#6a3a2c', '#5a3024', '#3a2a28'], torso: ['#7d4634', '#5a3024', '#3a2a28'], sleeve: '#7d4634', cuff: '#c9a66a',
+  back(g, o) {
+    g.save(); g.translate(-18, -48); g.rotate(-0.12);
+    const gg = g.createRadialGradient(-4, -6, 2, 0, 0, 24); gg.addColorStop(0, '#dcb06a'); gg.addColorStop(1, '#8a6232');
+    g.beginPath(); g.ellipse(0, 4, 15, 22, 0, 0, 7); hFill(g, gg, INK, 1); hRound(g, -6, -22, 12, 6, 2, '#6a4a2a', INK, 0.9);
+    g.strokeStyle = '#4a3220'; g.lineWidth = 1.2; g.beginPath(); g.arc(0, 8, 9, 0.3, 2.8); g.stroke(); g.restore();
+    g.save(); g.globalCompositeOperation = 'lighter'; g.lineCap = 'round';
+    for (let i = 0; i < 18; i++) { const ph = i * 0.9 + o.t * (1 + (i % 3) * 0.4), r = 28 + (i % 4) * 5; g.fillStyle = 'rgba(225,190,120,' + (0.35 + (i % 3) * 0.15).toFixed(2) + ')'; g.beginPath(); g.arc(Math.cos(ph) * r * 0.8, -44 + Math.sin(ph) * r * 0.9, 1.6 + (i % 3) * 0.5, 0, 7); g.fill(); }
+    g.restore();
+  },
+  head(g, o, sk) {
+    eSpikes(g, [[-15, -4], [-20, -14], [-12, -12], [-15, -26], [-6, -18], [-3, -30], [3, -20], [9, -29], [11, -17], [19, -22], [16, -4]], '#c5301f');
+    eHead(g, sk);
+    g.fillStyle = '#2a1a30'; g.globalAlpha = 0.9; g.beginPath(); g.ellipse(-6.4, 0.4, 5, 3.6, 0, 0, 7); g.fill(); g.beginPath(); g.ellipse(6.4, 0.4, 5, 3.6, 0, 0, 7); g.fill(); g.globalAlpha = 1;
+    eEye(g, -6.4, 0.3, { sc: '#eaf2ee', iris: '#6fb7b0', pupil: 'dot', r: 2.5 }); eEye(g, 6.4, 0.3, { sc: '#eaf2ee', iris: '#6fb7b0', pupil: 'dot', r: 2.5 });
+    mouth(g, 11, 3, false);
+    g.strokeStyle = '#c0242a'; g.lineWidth = 1; g.lineCap = 'round'; g.beginPath(); g.moveTo(-10, -7); g.lineTo(-4, -7); g.moveTo(-7, -9.6); g.lineTo(-7, -5); g.moveTo(-9.6, -5.4); g.lineTo(-4.4, -5.4); g.stroke();
+    eSpikes(g, [[-15, -9], [-6, -13], [2, -11], [-4, -6], [-12, -4]], '#c5301f'); eSpikes(g, [[15, -9], [6, -13], [-2, -11], [4, -7], [12, -4]], '#c5301f');
+  }
+});
+/* --- Дейдара: хвост на макушке, монокуляр, глиняная птица --- */
+ENEMY_ART.deidara = (g, o) => drawChar(g, Object.assign({}, o), Object.assign({
+  skin: '#f3d3b5',
+  back(g, o) {
+    g.save(); g.translate(28, -70 + Math.sin(o.t * 2.2) * 3);
+    hPath(g, [[-10, 2], [-2, -6], [8, -2], [14, 4], [8, 6], [0, 8]]); hFill(g, '#f4f0e6', INK, 0.9); hPath(g, [[-10, 2], [-18, -2], [-10, 6]]); hFill(g, '#f4f0e6', INK, 0.8);
+    g.fillStyle = INK; g.beginPath(); g.arc(8, 0, 1, 0, 7); g.fill(); g.restore();
+  },
+  body(g, o, br) { eLegs(g, o, '#1c1730', '#171229', '#14101e'); akatsuki(g, o, br, { open: false }); },
+  torsoFront(g, o, br) { akatsukiCollar(g, br); },
+  head(g, o, sk) {
+    eSpikes(g, [[-15, -4], [-18, -14], [-10, -18], [-4, -22], [4, -24], [12, -18], [16, -10], [15, -4]], '#ffdf70');
+    hEllipse(g, 0, -29, 6, 6, '#ffdf70', INK, 0.9); hPath(g, [[2, -28], [10, -16], [6, -6], [-2, -26]]); hFill(g, '#ffdf70', INK, 0.8);
+    eHead(g, sk);
+    brow(g, -4.8, '#d8b24a', 1.3); eEye(g, -6.4, 0.3, { iris: '#3a78c0', pupil: 'round', r: 2.8 });
+    mouth(g, 10.5, 4, true);
+    eSpikes(g, [[0, -12], [12, -10], [14, 8], [9, 12], [4, 2], [-1, -4]], '#ffdf70');                       // чёлка закрывает правый глаз
+    hEllipse(g, 6.4, 0.3, 4.3, 4.3, '#2b3b4a', INK, 0.9); hEllipse(g, 6.4, 0.3, 2.6, 2.6, '#e04a3a', INK, 0.6);   // монокуляр
+    g.fillStyle = 'rgba(255,255,255,.7)'; g.beginPath(); g.arc(5.4, -0.8, 0.8, 0, 7); g.fill();
+    g.strokeStyle = INK; g.lineWidth = 1; g.beginPath(); g.moveTo(10.5, -1); g.lineTo(15, -8); g.stroke();
+  }
+}, akaArms()));
+/* --- Сасори: красные волосы, плащ, хвост Хирико --- */
+ENEMY_ART.sasori = (g, o) => drawChar(g, o, Object.assign({
+  skin: '#f4d9c2',
+  back(g, o) {
+    g.save(); g.lineCap = 'round'; g.lineJoin = 'round';
+    const sway = Math.sin(o.t * 2.4) * 4 + (o.atk || 0) * 10;
+    const pts = [[-14, -20], [-34, -26], [-38, -52], [-24, -78 + sway], [-6, -90 + sway]];
+    for (let i = 0; i < pts.length - 1; i++) { g.strokeStyle = INK; g.lineWidth = 9 - i * 1.2; g.beginPath(); g.moveTo(pts[i][0], pts[i][1]); g.lineTo(pts[i + 1][0], pts[i + 1][1]); g.stroke(); }
+    for (let i = 0; i < pts.length - 1; i++) { g.strokeStyle = i % 2 ? '#7a4a6a' : '#9c6a8c'; g.lineWidth = 7 - i * 1.2; g.beginPath(); g.moveTo(pts[i][0], pts[i][1]); g.lineTo(pts[i + 1][0], pts[i + 1][1]); g.stroke(); }
+    hPath(g, [[-10, -90 + sway], [0, -98 + sway], [8, -88 + sway], [-2, -92 + sway]]); hFill(g, '#c8ced8', INK, 0.9); g.restore();
+  },
+  body(g, o, br) { eLegs(g, o, '#1c1730', '#171229', '#14101e'); akatsuki(g, o, br, {}); },
+  torsoFront(g, o, br) { akatsukiCollar(g, br); },
+  head(g, o, sk) {
+    eSpikes(g, [[-15, -4], [-19, -12], [-13, -14], [-15, -23], [-6, -19], [-2, -28], [4, -20], [10, -26], [12, -16], [19, -16], [15, -4]], '#b8381f');
+    eHead(g, sk);
+    brow(g, -4.5, '#8a2a18', 1.2); eEye(g, -6.4, 0.3, { iris: '#5a4a46', pupil: 'dot', r: 2.8 }); eEye(g, 6.4, 0.3, { iris: '#5a4a46', pupil: 'dot', r: 2.8 }); mouth(g, 10.5, 3.5, false);
+    eSpikes(g, [[-14, -10], [-5, -12], [2, -9], [-7, -4], [-13, -2]], '#b8381f'); eSpikes(g, [[14, -10], [5, -12], [-1, -9], [7, -4], [13, -2]], '#b8381f');
+  }
+}, akaArms()));
+/* --- Кисаме: синяя кожа, жабры на щеках, Самехада --- */
+ENEMY_ART.kisame = (g, o) => drawChar(g, o, Object.assign({
+  skin: '#5d8cc0',
+  back(g, o) {
+    g.save(); g.translate(-4, -44); g.rotate(-0.5);
+    hPath(g, [[-9, 0], [9, 0], [11, -78], [0, -90], [-11, -78]]); const sg = g.createLinearGradient(-10, 0, 10, 0); sg.addColorStop(0, '#9aa3b6'); sg.addColorStop(1, '#5e6578'); hFill(g, sg, INK, 1);
+    g.strokeStyle = 'rgba(240,235,220,.85)'; g.lineWidth = 2; for (let y = -10; y > -80; y -= 9) { g.beginPath(); g.moveTo(-10, y); g.lineTo(10, y - 4); g.stroke(); }
+    g.fillStyle = 'rgba(30,34,50,.55)'; for (let y = -6; y > -80; y -= 7) { g.beginPath(); g.arc(-3 + (y % 14 ? 0 : 5), y, 1.3, 0, 7); g.fill(); }
+    g.restore();
+  },
+  body(g, o, br) { eLegs(g, o, '#1c1730', '#171229', '#14101e'); akatsuki(g, o, br, {}); },
+  torsoFront(g, o, br) { akatsukiCollar(g, br); },
+  head(g, o, sk) {
+    eSpikes(g, [[-15, -4], [-17, -14], [-12, -13], [-10, -24], [-4, -17], [0, -28], [5, -17], [11, -24], [12, -13], [18, -14], [15, -4]], '#27345a');
+    eHead(g, sk);
+    g.strokeStyle = '#2d4f82'; g.lineWidth = 0.9; g.lineCap = 'round'; for (let i = 0; i < 3; i++) { g.beginPath(); g.moveTo(-13, 3 + i * 2.4); g.lineTo(-9, 3.4 + i * 2.4); g.moveTo(13, 3 + i * 2.4); g.lineTo(9, 3.4 + i * 2.4); g.stroke(); }
+    eEye(g, -6.4, 0.3, { sc: '#f4f4ee', iris: '#101216', pupil: 'dot', r: 2.2 }); eEye(g, 6.4, 0.3, { sc: '#f4f4ee', iris: '#101216', pupil: 'dot', r: 2.2 });
+    brow(g, -4.6, '#27345a', 1.4);
+    hPath(g, [[-6, 8], [6, 8], [5, 13], [-5, 13]]); hFill(g, '#7a1c2c', INK, 0.8); g.fillStyle = '#fff'; for (let i = -5; i <= 5; i += 2.5) { hPath(g, [[i - 1, 8.2], [i + 1, 8.2], [i, 10.8]]); g.fill(); }
+    eSpikes(g, [[-15, -10], [-4, -12], [-10, -4]], '#27345a'); eSpikes(g, [[15, -10], [4, -12], [10, -4]], '#27345a');
+  }
+}, akaArms()));
+/* --- Какузу: капюшон, маска со швами, красные глаза --- */
+ENEMY_ART.kakuzu = (g, o) => drawChar(g, o, Object.assign({
+  skin: '#a8896c',
+  back(g, o) {
+    g.save(); g.lineCap = 'round'; g.strokeStyle = '#0d0b12'; g.lineWidth = 2.2;
+    for (let i = 0; i < 5; i++) { g.beginPath(); g.moveTo(-8, -46); g.bezierCurveTo(-30 - i * 4, -46 + Math.sin(o.t * 2 + i) * 8, -28, -76 + i * 6, -40 - i * 3, -86 + Math.sin(o.t * 2.3 + i) * 6 + i * 4); g.stroke(); }
+    g.restore();
+  },
+  body(g, o, br) { eLegs(g, o, '#1c1730', '#171229', '#14101e'); akatsuki(g, o, br, {}); },
+  torsoFront(g, o, br) { akatsukiCollar(g, br); },
+  head(g, o, sk) {
+    hPath(g, [[-17, 6], [-15, -14], [-6, -24], [6, -24], [15, -14], [17, 6], [12, 12], [-12, 12]]); hFill(g, '#2a2440', INK, 0.9);                 // капюшон
+    eHead(g, sk);
+    g.fillStyle = '#c0392b'; g.beginPath(); g.ellipse(-6.4, 0.3, 3.8, 3.4, 0, 0, 7); g.fill(); g.beginPath(); g.ellipse(6.4, 0.3, 3.8, 3.4, 0, 0, 7); g.fill();
+    eEye(g, -6.4, 0.3, { sc: '#d8392a', iris: '#6ad04a', pupil: 'dot', r: 2.8 }); eEye(g, 6.4, 0.3, { sc: '#d8392a', iris: '#6ad04a', pupil: 'dot', r: 2.8 });
+    brow(g, -4.8, INK, 1.6);
+    hPath(g, [[-14, 3], [14, 3], [13, 12], [0, 17], [-13, 12]]); hFill(g, '#3a3445', INK, 0.9);
+    g.strokeStyle = '#a9a1b8'; g.lineWidth = 0.7; for (let x = -9; x <= 9; x += 4.5) { g.beginPath(); g.moveTo(x, 6); g.lineTo(x + 0.6, 12); g.stroke(); } g.beginPath(); g.moveTo(-12, 8.5); g.lineTo(12, 8.5); g.stroke();
+    hPath(g, [[-15, -10], [15, -10], [15.5, -4.5], [-15.5, -4.5]]); hFill(g, '#2a2440', INK, 0.9); hRound(g, -8.5, -11, 17, 7, 1.6, '#b9c2cc', INK, 0.9);
+    g.strokeStyle = INK; g.lineWidth = 0.9; g.beginPath(); g.moveTo(-6, -8); g.lineTo(6, -9); g.moveTo(-6, -4.6); g.lineTo(6, -5.6); g.stroke();
+  }
+}, akaArms()));
+/* --- Конан: синие волосы, бумажная роза, бумажные крылья --- */
+ENEMY_ART.konan = (g, o) => drawChar(g, o, Object.assign({
+  skin: '#f4d8c4',
+  back(g, o) {
+    const fl = Math.sin(o.t * 2.6) * 0.1 + (o.atk || 0) * 0.3;
+    for (const side of [-1, 1]) {
+      g.save(); g.translate(side * 8, -52); g.scale(side * 0.82, 0.82); g.rotate(-fl);
+      for (let i = 0; i < 5; i++) { const L = 30 + i * 6; hPath(g, [[0, i * 3], [L * 0.9, -20 - i * 9], [L, -14 - i * 8 + 10], [L * 0.4, i * 3 + 7]]); hFill(g, i % 2 ? '#e8e4ee' : '#f6f4fa', '#8a86a0', 0.7); }
+      g.restore();
+    }
+  },
+  body(g, o, br) { eLegs(g, o, '#1c1730', '#171229', '#14101e'); akatsuki(g, o, br, {}); },
+  torsoFront(g, o, br) { akatsukiCollar(g, br); },
+  head(g, o, sk) {
+    eSpikes(g, [[-15, -4], [-18, -15], [-8, -22], [2, -24], [12, -20], [17, -10], [15, -4]], '#3f56b0');
+    eHead(g, sk);
+    brow(g, -4.8, '#2d3f88', 1.2); eEye(g, -6.4, 0.3, { iris: '#c8932a', pupil: 'round', r: 2.8 }); eEye(g, 6.4, 0.3, { iris: '#c8932a', pupil: 'round', r: 2.8 });
+    mouth(g, 10.5, 3, false); g.fillStyle = '#a0a8b8'; g.beginPath(); g.arc(0, 13.4, 0.9, 0, 7); g.fill();
+    eSpikes(g, [[-15, -10], [-4, -12], [-10, 2], [-16, 4]], '#3f56b0'); eSpikes(g, [[15, -10], [4, -12], [10, -4], [14, -2]], '#3f56b0');
+    g.save(); g.translate(-12, -17); for (let i = 0; i < 6; i++) { const a = i * 1.047; g.beginPath(); g.ellipse(Math.cos(a) * 3.4, Math.sin(a) * 3.4, 3, 2, a, 0, 7); g.fillStyle = '#f6f4fa'; g.fill(); g.strokeStyle = '#8a86a0'; g.lineWidth = 0.6; g.stroke(); } hEllipse(g, 0, 0, 2, 2, '#e0dcea', '#8a86a0', 0.6); g.restore();
+  }
+}, akaArms()));
+/* --- Пэйн: рыжие волосы, Риннеган, пирсинг, чёрные стержни --- */
+ENEMY_ART.pain = (g, o) => drawChar(g, o, Object.assign({
+  skin: '#f0d0b0',
+  back(g, o) {
+    for (let i = 0; i < 4; i++) { const a = o.t * 1.2 + i * 1.57, x = Math.cos(a) * 28, y = -56 + Math.sin(a) * 18; g.save(); g.translate(x, y); g.rotate(0.3 + i); hRound(g, -1, -8, 2, 16, 1, '#15121c', '#6b5a88', 0.5); g.restore(); }
+  },
+  body(g, o, br) { eLegs(g, o, '#1c1730', '#171229', '#14101e'); akatsuki(g, o, br, {}); },
+  torsoFront(g, o, br) { akatsukiCollar(g, br); },
+  head(g, o, sk) {
+    eSpikes(g, [[-15, -4], [-19, -13], [-12, -12], [-16, -24], [-7, -17], [-5, -30], [2, -19], [8, -29], [11, -16], [19, -21], [16, -4]], '#e8731c');
+    eHead(g, sk);
+    brow(g, -4.8, '#c85a14', 1.3);
+    for (const x of [-6.4, 6.4]) { g.beginPath(); g.ellipse(x, 0.3, 3.8, 3.8, 0, 0, 7); g.fillStyle = '#b9a6e8'; g.fill(); g.lineWidth = 0.8; g.strokeStyle = INK; g.stroke(); g.strokeStyle = '#4a2a88'; g.lineWidth = 0.55; for (let i = 1; i <= 3; i++) { g.beginPath(); g.arc(x, 0.3, i * 1.05, 0, 7); g.stroke(); } g.fillStyle = INK; g.beginPath(); g.arc(x, 0.3, 0.5, 0, 7); g.fill(); }
+    mouth(g, 11, 3.5, false);
+    g.fillStyle = '#0e0c14'; for (const [x, y] of [[-3.4, -3], [3.4, -3], [-2.4, -6.6], [2.4, -6.6], [-4, 13], [4, 13], [-14, 1], [14, 1]]) { hRound(g, x - 0.5, y - 1.4, 1, 2.8, 0.5, '#0e0c14'); }
+    eSpikes(g, [[-15, -10], [-5, -12], [-2, -8], [-8, -5], [-13, -3]], '#e8731c'); eSpikes(g, [[15, -10], [5, -12], [2, -8], [8, -5], [13, -3]], '#e8731c');
+  }
+}, akaArms()));
+/* --- Обито: оранжевая маска со спиралью, вихрь Камуи --- */
+ENEMY_ART.obito = (g, o) => drawChar(g, o, Object.assign({
+  skin: '#e2b896',
+  back(g, o) {
+    g.save(); g.translate(0, -52); g.lineWidth = 1.6; g.lineCap = 'round';
+    for (let k = 0; k < 4; k++) { g.strokeStyle = 'rgba(' + (k % 2 ? '150,90,220' : '60,30,110') + ',' + (0.55 - k * 0.08).toFixed(2) + ')'; g.beginPath(); for (let i = 0; i < 70; i++) { const a = i * 0.2 + o.t * 3 + k * 1.57, r = i * 0.55; const x = Math.cos(a) * r, y = Math.sin(a) * r * 0.9; i ? g.lineTo(x, y) : g.moveTo(x, y); } g.stroke(); }
+    g.restore();
+  },
+  body(g, o, br) { eLegs(g, o, '#1c1730', '#171229', '#14101e'); akatsuki(g, o, br, {}); },
+  torsoFront(g, o, br) { akatsukiCollar(g, br); },
+  head(g, o, sk) {
+    eSpikes(g, [[-15, -4], [-20, -12], [-13, -12], [-17, -24], [-8, -18], [-6, -31], [1, -20], [8, -30], [11, -17], [20, -21], [16, -4]], '#17151f');
+    eHead(g, sk);
+    g.beginPath(); g.moveTo(-14.5, -3); g.bezierCurveTo(-15, 10, -9, 15, 0, 15); g.bezierCurveTo(9, 15, 15, 10, 14.5, -3); g.bezierCurveTo(13, -13, -13, -13, -14.5, -3); g.closePath();
+    const mg = g.createRadialGradient(-4, -4, 2, 0, 0, 20); mg.addColorStop(0, '#f08a2e'); mg.addColorStop(1, '#c75a12'); hFill(g, mg, INK, 1);
+    g.strokeStyle = '#1b1220'; g.lineWidth = 1; g.beginPath(); for (let i = 0; i < 40; i++) { const a = i * 0.34, r = 0.35 + i * 0.2; const x = 5 + Math.cos(a) * r, y = 0 + Math.sin(a) * r; i ? g.lineTo(x, y) : g.moveTo(x, y); } g.stroke();
+    g.fillStyle = '#0b0910'; g.beginPath(); g.arc(5, 0, 1.9, 0, 7); g.fill();
+    eSpikes(g, [[-15, -9], [-2, -13], [4, -12], [-9, -8]], '#17151f');
+  }
+}, akaArms()));
+/* --- Мадара: длинные дикие волосы, красная броня, Мангэкё, ган-бай --- */
+ENEMY_ART.madara = (g, o) => drawChar(g, o, {
+  skin: '#e6c19e', legs: ['#26283c', '#1d1f30', '#15161f'], torso: ['#8e2a24', '#5a1a18', '#2a2c40'], sleeve: '#26283c', cuff: '#5a1a18',
+  back(g, o) {
+    hPath(g, [[-16, -78], [-26, -62], [-34, -44], [-28, -20], [-20, -4], [-12, -26], [-4, -4], [4, -26], [12, -4], [20, -22], [28, -44], [20, -66], [14, -78]]); hFill(g, '#14121c', INK, 0.9);
+    g.save(); g.translate(26, -34); g.rotate(0.3);
+    hRound(g, -1.4, -10, 2.8, 48, 1.2, '#4a3a2a', INK, 0.8); g.beginPath(); g.arc(0, -22, 19, 0, 7); const fg = g.createRadialGradient(0, -22, 3, 0, -22, 19); fg.addColorStop(0, '#5a5a6a'); fg.addColorStop(1, '#2a2a38'); hFill(g, fg, INK, 1);
+    g.strokeStyle = '#c0392b'; g.lineWidth = 1.6; g.beginPath(); g.arc(0, -22, 15, 0, 7); g.stroke(); g.fillStyle = '#c0392b'; for (let i = 0; i < 3; i++) { const a = i * 2.094 - 1.57; g.beginPath(); g.arc(Math.cos(a) * 7, -22 + Math.sin(a) * 7, 2.2, 0, 7); g.fill(); }
+    g.restore();
+  },
+  torsoFront(g, o, br) {
+    hPath(g, [[-14, -50 + br], [14, -50 + br], [15, -30], [-15, -30]]); hFill(g, '#8e2a24', INK, 0.9);
+    g.strokeStyle = '#3a1210'; g.lineWidth = 0.9; for (let i = 0; i < 3; i++) { g.beginPath(); g.moveTo(-14, -44 + i * 6); g.lineTo(14, -44 + i * 6); g.stroke(); }
+    hEllipse(g, -14, -49 + br, 6, 4, '#7a2420', INK, 0.9); hEllipse(g, 14, -49 + br, 6, 4, '#7a2420', INK, 0.9); hRound(g, -13, -33, 26, 6, 2, '#3a3c58', INK, 0.9);
+  },
+  head(g, o, sk) {
+    eSpikes(g, [[-15, -4], [-21, -10], [-14, -14], [-20, -24], [-9, -19], [-9, -32], [-2, -22], [4, -34], [8, -22], [16, -30], [14, -16], [22, -14], [15, -4]], '#14121c');
+    eHead(g, sk);
+    g.strokeStyle = '#8a6a50'; g.lineWidth = 0.7; g.beginPath(); g.moveTo(-11, 3); g.lineTo(-3, 4.4); g.moveTo(11, 3); g.lineTo(3, 4.4); g.stroke();
+    brow(g, -4.6, INK, 1.8);
+    for (const x of [-6.4, 6.4]) { g.beginPath(); g.ellipse(x, 0.3, 3.6, 3.4, 0, 0, 7); g.fillStyle = '#d63a3a'; g.fill(); g.lineWidth = 0.8; g.strokeStyle = INK; g.stroke(); g.fillStyle = INK; g.beginPath(); g.arc(x, 0.3, 0.8, 0, 7); g.fill(); for (let i = 0; i < 3; i++) { const a = i * 2.094 + 0.5; hPath(g, [[x + Math.cos(a) * 1, 0.3 + Math.sin(a) * 1], [x + Math.cos(a + 0.5) * 3, 0.3 + Math.sin(a + 0.5) * 3], [x + Math.cos(a - 0.5) * 3, 0.3 + Math.sin(a - 0.5) * 3]]); g.fillStyle = INK; g.fill(); } }
+    mouth(g, 11, 3.5, false);
+    eSpikes(g, [[-15, -10], [-6, -14], [-1, -9], [-8, -2], [-12, 4], [-17, 3]], '#14121c'); eSpikes(g, [[15, -10], [6, -14], [1, -9], [8, -2], [12, 4], [17, 3]], '#14121c');
+  }
+});
+/* --- Кагуя: белая, рога, третий глаз, чёрные шары --- */
+ENEMY_ART.kaguya = (g, o) => drawChar(g, o, {
+  skin: '#f6f2f0', legs: ['#f1ecf2', '#e6e0ec', '#9a8aae'], torso: ['#f7f3f8', '#ddd5e6', '#7a5aa8'], sleeve: '#f1ecf6', cuff: '#7a5aa8',
+  back(g, o) {
+    hPath(g, [[-17, -80], [17, -80], [26, -40], [24, -2], [-26, -2], [-26, -42]]); const hg = g.createLinearGradient(0, -80, 0, 0); hg.addColorStop(0, '#f2eefa'); hg.addColorStop(1, '#c8bde0'); hFill(g, hg, INK, 0.9);
+    g.save(); g.globalCompositeOperation = 'lighter'; glow(g, 0, -50, 54, '190,170,255', 0.28); g.restore();
+    for (let i = 0; i < 3; i++) { const a = o.t * 1.3 + i * 2.09, x = Math.cos(a) * 32, y = -58 + Math.sin(a) * 14; g.beginPath(); g.arc(x, y, 5, 0, 7); const bg = g.createRadialGradient(x - 1, y - 1, 1, x, y, 5); bg.addColorStop(0, '#6a5a8a'); bg.addColorStop(1, '#100c1c'); hFill(g, bg, '#c8b8f0', 0.7); }
+  },
+  torsoFront(g, o, br) { hRound(g, -14, -32, 28, 5, 2, '#7a5aa8', INK, 0.8); g.fillStyle = '#7a5aa8'; for (let i = 0; i < 3; i++) { g.beginPath(); g.arc(-8 + i * 8, -42 + br, 1.4, 0, 7); g.fill(); } },
+  head(g, o, sk) {
+    eSpikes(g, [[-15, -4], [-18, -14], [-9, -22], [0, -24], [9, -22], [18, -14], [15, -4], [8, -10], [0, -12], [-8, -10]], '#f2eefa', '#c8bde0');
+    eHead(g, sk);
+    for (const x of [-6.4, 6.4]) { g.beginPath(); g.ellipse(x, 0.3, 3.8, 3.6, 0, 0, 7); g.fillStyle = '#d8d0f4'; g.fill(); g.lineWidth = 0.8; g.strokeStyle = INK; g.stroke(); g.fillStyle = 'rgba(120,100,180,.8)'; g.beginPath(); g.arc(x, 0.3, 0.9, 0, 7); g.fill(); }
+    brow(g, -4.8, '#8a7aa8', 1.1); mouth(g, 11, 3, false);
+    g.beginPath(); g.ellipse(0, -9, 3, 3, 0, 0, 7); g.fillStyle = '#b9a6e8'; g.fill(); g.lineWidth = 0.7; g.strokeStyle = INK; g.stroke(); g.strokeStyle = '#4a2a88'; g.lineWidth = 0.5; for (let i = 1; i <= 2; i++) { g.beginPath(); g.arc(0, -9, i * 1.1, 0, 7); g.stroke(); }
+    hPath(g, [[-8, -13], [-12, -26], [-6, -14]]); hFill(g, '#f6f0e4', INK, 0.9); hPath(g, [[8, -13], [12, -26], [6, -14]]); hFill(g, '#f6f0e4', INK, 0.9);
+    eSpikes(g, [[-15, -9], [-5, -13], [-2, -8], [-9, 6], [-17, 10], [-17, 0]], '#f2eefa', '#c8bde0'); eSpikes(g, [[15, -9], [5, -13], [2, -8], [9, 6], [17, 10], [17, 0]], '#f2eefa', '#c8bde0');
+  }
+});
+/* --- Хидан: зачёсанные серебристые волосы, коса Дзясина, кулон --- */
+ENEMY_ART.hidan = (g, o) => drawChar(g, o, Object.assign({
+  skin: '#f1d7c0',
+  back(g, o) {
+    g.save(); g.translate(30, -44); g.rotate(0.35 + (o.atk || 0) * 0.5);
+    hRound(g, -1.4, -50, 2.8, 100, 1.2, '#5a4a40', INK, 0.8);
+    for (const [r, s] of [[0, 1], [2.1, 1], [-2.1, 1]]) { g.save(); g.translate(0, -50); g.rotate(r * 0.55); hPath(g, [[0, 0], [14, -4], [18, -22], [4, -14]]); hFill(g, '#c4313a', INK, 0.9); g.restore(); }
+    g.restore();
+  },
+  body(g, o, br) { eLegs(g, o, '#1c1730', '#171229', '#14101e'); akatsuki(g, o, br, { open: true, inner: '#f0d4bc' }); },
+  torsoFront(g, o, br) {
+    akatsukiCollar(g, br);
+    g.strokeStyle = '#b8c0cc'; g.lineWidth = 1; g.beginPath(); g.moveTo(-3, -50 + br); g.lineTo(0, -36); g.lineTo(3, -50 + br); g.stroke();
+    g.beginPath(); g.arc(0, -35, 4, 0, 7); g.fillStyle = '#c8d0dc'; g.fill(); g.stroke(); hPath(g, [[0, -38], [3, -33], [-3, -33]]); g.strokeStyle = '#7a2a30'; g.lineWidth = 0.8; g.stroke();
+  },
+  head(g, o, sk) {
+    eSpikes(g, [[-15, -4], [-17, -14], [-10, -21], [0, -23], [10, -21], [17, -14], [15, -4], [10, -9], [0, -11], [-10, -9]], '#d9dde8');
+    g.strokeStyle = 'rgba(120,130,150,.6)'; g.lineWidth = 0.7; for (let x = -9; x <= 9; x += 4.5) { g.beginPath(); g.moveTo(x, -12); g.quadraticCurveTo(x + 2, -18, x - 1, -22); g.stroke(); }
+    eHead(g, sk);
+    brow(g, -4.6, '#9aa0b0', 1.3); eEye(g, -6.4, 0.3, { iris: '#b04cc8', pupil: 'dot', r: 2.8 }); eEye(g, 6.4, 0.3, { iris: '#b04cc8', pupil: 'dot', r: 2.8 });
+    hPath(g, [[-6, 8], [6, 8], [5, 13], [-5, 13]]); hFill(g, '#7a1c2c', INK, 0.8); g.fillStyle = '#fff'; for (let i = -4; i <= 4; i += 2) { g.fillRect(i - 0.7, 8.2, 1.4, 2); }
+  }
+}, akaArms()));
+
+/* --- обычные враги --- */
+ENEMY_ART.ninja = (g, o) => {                                                // отступник со скрытым лицом
+  const pal = o.pal || { c: '#4a5a8a', d: '#2a3050', a: '#d9a441' };
+  drawChar(g, o, {
+    skin: '#e0b48c', legs: [pal.d, mix(pal.d, '#000000', 0.2), '#201c28'], torso: [pal.c, pal.d, pal.a], sleeve: pal.c, cuff: pal.a,
+    torsoFront(g, o, br) { g.strokeStyle = 'rgba(0,0,0,.35)'; g.lineWidth = 1; g.beginPath(); g.moveTo(-12, -48 + br); g.lineTo(12, -30); g.stroke(); },
+    head(g, o, sk) {
+      eHead(g, sk);
+      hPath(g, [[-15, -9], [15, -9], [15.5, -3.5], [-15.5, -3.5]]); hFill(g, pal.a, INK, 0.9); hRound(g, -8.5, -10.4, 17, 7, 1.6, '#aab4c8', INK, 0.9); g.strokeStyle = INK; g.lineWidth = 0.9; g.beginPath(); g.moveTo(-6, -9); g.lineTo(6, -4.6); g.stroke();
+      eEye(g, -6.4, 0.3, { iris: '#2a2a2a', pupil: 'dot', r: 2.6 }); eEye(g, 6.4, 0.3, { iris: '#2a2a2a', pupil: 'dot', r: 2.6 }); brow(g, -4.4, INK, 1.8);
+      hPath(g, [[-14.5, 3.5], [14.5, 3.5], [13, 12], [0, 17], [-13, 12]]); hFill(g, pal.d, INK, 0.9);
+      eSpikes(g, [[-15, -9], [-17, -17], [-8, -19], [0, -21], [9, -19], [17, -17], [15, -9]], pal.d);
+    }
+  });
+};
+ENEMY_ART.wolf = (g, o) => {                                                  // волк-страж
+  const pal = o.pal || { c: '#6a5a4a', d: '#3a3028', a: '#d9a441' }, t = o.t, br = o.calm ? 0 : Math.sin(t * 4) * 1.2, st = Math.sin(t * 5) * 0.12;
+  g.save();
+  g.save(); g.translate(-26, -34); g.rotate(-0.5 + Math.sin(t * 3) * 0.15); hPath(g, [[0, 0], [-8, -6], [-30, -2], [-34, 6], [-12, 6]]); hFill(g, pal.c, INK, 0.9); g.restore();
+  for (const [x, a] of [[-18, 0.1], [10, -0.1], [-8, -0.12], [20, 0.12]]) { g.save(); g.translate(x, -22); g.rotate(a + st * (x > 0 ? 1 : -1)); hRound(g, -4, 0, 8, 20, 3, x === -8 || x === 20 ? pal.d : pal.c, INK, 0.9); g.restore(); }
+  g.beginPath(); g.moveTo(-26, -26 + br); g.bezierCurveTo(-24, -52, 10, -54, 24, -44); g.bezierCurveTo(30, -38, 28, -26, 22, -22 + br); g.bezierCurveTo(10, -18, -14, -16, -26, -26 + br); g.closePath();
+  const bg = g.createLinearGradient(0, -54, 0, -16); bg.addColorStop(0, mix(pal.c, '#ffffff', 0.15)); bg.addColorStop(1, pal.d); hFill(g, bg, INK, 1);
+  g.save(); g.translate(26, -44 + br); g.rotate(0.15);
+  hPath(g, [[-10, -8], [12, -10], [26, 0], [24, 8], [10, 10], [-8, 8]]); hFill(g, pal.c, INK, 1);
+  hPath(g, [[-6, -8], [-4, -22], [4, -9]]); hFill(g, pal.d, INK, 0.9); hPath(g, [[26, 0], [20, 5], [12, 4]]); hFill(g, '#2a1a1a', INK, 0.6);
+  g.fillStyle = '#fff'; hPath(g, [[16, 6], [18, 11], [20, 6]]); g.fill(); g.fillStyle = pal.a; g.beginPath(); g.ellipse(8, -2, 2.4, 1.8, 0.3, 0, 7); g.fill(); g.fillStyle = INK; g.beginPath(); g.arc(8.6, -2, 0.9, 0, 7); g.fill();
+  g.restore(); g.restore();
+};
+ENEMY_ART.wisp = (g, o) => {                                                  // блуждающий дух огня
+  const bp = o.pal || { c: '#6a8ae0', d: '#2a3a8a' }, t = o.t;
+  const pal = { c: mix(bp.c, '#7fb6ff', 0.65), d: mix(bp.d, '#2a3a8a', 0.6), a: '#eaf5ff' };   // дух: холодное свечение с оттенком биома
+  g.save(); g.translate(0, -46);
+  g.globalCompositeOperation = 'lighter'; glow(g, 0, 0, 44, '120,160,255', 0.35); g.globalCompositeOperation = 'source-over';
+  g.beginPath(); g.moveTo(0, 26); g.bezierCurveTo(-24, 20, -22, -10, -6, -22 - Math.sin(t * 5) * 3); g.bezierCurveTo(-2, -34 - Math.sin(t * 6) * 4, 4, -30, 8, -22); g.bezierCurveTo(24, -10, 24, 20, 0, 26); g.closePath();
+  const bg = g.createRadialGradient(-4, -4, 2, 0, 0, 30); bg.addColorStop(0, pal.a); bg.addColorStop(0.5, pal.c); bg.addColorStop(1, pal.d); hFill(g, bg, INK, 1);
+  g.fillStyle = INK; g.beginPath(); g.ellipse(-7, -2, 3, 4.4, 0, 0, 7); g.fill(); g.beginPath(); g.ellipse(7, -2, 3, 4.4, 0, 0, 7); g.fill(); g.fillStyle = '#fff'; g.beginPath(); g.arc(-7.6, -3.4, 1, 0, 7); g.fill(); g.beginPath(); g.arc(6.4, -3.4, 1, 0, 7); g.fill();
+  g.strokeStyle = INK; g.lineWidth = 1; g.beginPath(); g.moveTo(-5, 10); g.quadraticCurveTo(0, 14, 5, 10); g.stroke();
+  g.restore();
+};
+ENEMY_ART.oni = (g, o) => {                                                   // демон-страж (запасной образ босса)
+  const pal = o.pal || { c: '#7a3a3a', d: '#3a1a1a', a: '#e0b050' }, br = o.calm ? 0 : Math.sin(o.t * 2.6);
+  drawChar(g, o, {
+    skin: mix(pal.c, '#ffffff', 0.1), legs: [pal.d, pal.d, '#201010'], torso: [pal.c, pal.d, pal.a], sleeve: pal.c, cuff: pal.a,
+    back(g) { g.save(); g.translate(22, -30); g.rotate(0.5); hRound(g, -3, -50, 6, 60, 3, '#5a4030', INK, 0.9); hEllipse(g, 0, -52, 8, 11, '#6a4a38', INK, 1); g.fillStyle = '#ccc'; for (let i = 0; i < 4; i++) { hPath(g, [[-2 + i * 1.5 - 3, -58], [i * 3 - 4, -66], [i * 3 - 2, -58]]); g.fill(); } g.restore(); },
+    head(g, o, sk) {
+      hPath(g, [[-9, -12], [-13, -28], [-4, -14]]); hFill(g, '#efe6c8', INK, 0.9); hPath(g, [[9, -12], [13, -28], [4, -14]]); hFill(g, '#efe6c8', INK, 0.9);
+      eHead(g, sk); brow(g, -4, INK, 2.2); eEye(g, -6.4, 0.3, { sc: '#f4e6a0', iris: '#a02020', pupil: 'slit', r: 2.8 }); eEye(g, 6.4, 0.3, { sc: '#f4e6a0', iris: '#a02020', pupil: 'slit', r: 2.8 });
+      hPath(g, [[-8, 7], [8, 7], [7, 13], [-7, 13]]); hFill(g, '#4a1010', INK, 0.8); g.fillStyle = '#fff'; hPath(g, [[-7, 7.2], [-5, 7.2], [-6, 10]]); g.fill(); hPath(g, [[7, 7.2], [5, 7.2], [6, 10]]); g.fill();
+    }
+  });
+};
+/* --- вывод на сцену: слой, масштаб, вспышка попадания --- */
+let enemyScratch = null;
+function drawEnemyArt(g, e, geom, t, opt) {
+  const key = enemyArtKey(e), fn = ENEMY_ART[key] || ENEMY_ART.oni;
+  if (!enemyScratch) { const [c, cg] = mkCanvas(240, 200); enemyScratch = { c, g: cg }; }
+  const L = enemyScratch, lg = L.g, b = BIOMES[biomeIdx()];
+  lg.save(); lg.setTransform(1, 0, 0, 1, 0, 0); lg.clearRect(0, 0, L.c.width, L.c.height); lg.restore();
+  lg.save(); lg.setTransform(SS, 0, 0, SS, 0, 0); lg.translate(120, 180);
+  fn(lg, { t: t / 1000 + (e.phase || 0), atk: clamp01((e.atkT || 0) / 0.5), calm: !!opt.calm, pal: b.pal });
+  lg.restore();
+  if (opt.flash > 0) { lg.save(); lg.globalCompositeOperation = 'source-atop'; lg.fillStyle = 'rgba(255,255,255,' + (0.75 * opt.flash).toFixed(3) + ')'; lg.fillRect(0, 0, L.c.width, L.c.height); lg.restore(); }
+  const s = geom.size / 104;
+  g.save(); g.globalAlpha = opt.alpha; g.translate(geom.cx + opt.dx, GROUND + opt.dy); g.scale(-s, s);     // лицом к герою
+  g.drawImage(L.c, -120, -180, 240, 200);
+  g.restore();
+}
+/* --- портрет для списка союзников-боссов: голова и плечи --- */
+function paintEnemyPortrait(key) {
+  const c = document.createElement('canvas'); c.width = 128; c.height = 128; const g = c.getContext('2d');
+  g.fillStyle = '#12142a'; g.fillRect(0, 0, 128, 128);
+  const [lc, lg] = mkCanvas(160, 160);
+  lg.save(); lg.translate(80, 150); (ENEMY_ART[key] || ENEMY_ART.oni)(lg, { t: 0.4, atk: 0, calm: true, pal: { c: '#7a3a3a', d: '#3a1a1a', a: '#e0b050' } }); lg.restore();
+  g.imageSmoothingEnabled = true; g.drawImage(lc, 0, 0, 160 * SS, 160 * SS, -76, -89, 160 * 1.75, 160 * 1.75);
+  return c;
+}
 /* ================= современная сцена: слои, свет, частицы, техники ================= */
 const SS = 3;                                            // плотность холста: логические 320×180 рисуются в 960×540
 function mkCanvas(w, h) { const c = document.createElement('canvas'); c.width = Math.ceil(w * SS); c.height = Math.ceil(h * SS); const g = c.getContext('2d'); g.scale(SS, SS); return [c, g]; }
@@ -2294,39 +2866,6 @@ function drawAmbient(g, bi, t) {
     g.fillStyle = 'rgba(' + A.col + ',' + a.toFixed(3) + ')'; g.beginPath(); g.arc(x, y, s, 0, 7); g.fill();
   }
 }
-/* --- враг с лёгким светом по контуру --- */
-function epx(c) {                                        // Scale2x: сглаживает диагонали пиксель-арта без размытия
-  const w = c.width, h = c.height, src = c.getContext('2d').getImageData(0, 0, w, h).data;
-  const o = document.createElement('canvas'); o.width = w * 2; o.height = h * 2;
-  const og = o.getContext('2d'), out = og.createImageData(w * 2, h * 2), d = out.data;
-  const at = (x, y) => (Math.max(0, Math.min(h - 1, y)) * w + Math.max(0, Math.min(w - 1, x))) * 4;
-  const eq = (a, b) => src[a] === src[b] && src[a + 1] === src[b + 1] && src[a + 2] === src[b + 2] && src[a + 3] === src[b + 3];
-  const put = (x, y, s) => { const k = (y * w * 2 + x) * 4; d[k] = src[s]; d[k + 1] = src[s + 1]; d[k + 2] = src[s + 2]; d[k + 3] = src[s + 3]; };
-  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-    const P = at(x, y), A = at(x, y - 1), B = at(x + 1, y), C = at(x - 1, y), D = at(x, y + 1);
-    put(2 * x, 2 * y, eq(C, A) && !eq(C, D) && !eq(A, B) ? A : P);
-    put(2 * x + 1, 2 * y, eq(A, B) && !eq(A, C) && !eq(B, D) ? B : P);
-    put(2 * x, 2 * y + 1, eq(D, C) && !eq(D, B) && !eq(C, A) ? C : P);
-    put(2 * x + 1, 2 * y + 1, eq(B, D) && !eq(B, A) && !eq(D, C) ? D : P);
-  }
-  og.putImageData(out, 0, 0); return o;
-}
-const litCache = new Map();
-function litEnemy(spr, size, key) {
-  let o = litCache.get(key); if (o) return o;
-  if (spr.width <= 32) { for (let i = 0; i < 2; i++) spr = epx(spr); }
-  const px = Math.round(size * SS);
-  const mk = () => { const c = document.createElement('canvas'); c.width = px; c.height = px; const g = c.getContext('2d'); g.imageSmoothingEnabled = false; return [c, g]; };
-  let [c, g] = mk(); g.drawImage(spr, 0, 0, px, px);
-  g.globalCompositeOperation = 'source-atop';
-  const sh = g.createLinearGradient(0, 0, 0, px); sh.addColorStop(0, 'rgba(255,240,210,.20)'); sh.addColorStop(0.55, 'rgba(0,0,0,0)'); sh.addColorStop(1, 'rgba(6,8,30,.42)'); g.fillStyle = sh; g.fillRect(0, 0, px, px);
-  const [rc, rg] = mk(); rg.drawImage(spr, 0, 0, px, px); rg.globalCompositeOperation = 'destination-out'; rg.drawImage(spr, 3, 3, px, px);
-  rg.globalCompositeOperation = 'source-in'; rg.fillStyle = 'rgba(190,225,255,.75)'; rg.fillRect(0, 0, px, px);
-  g.globalCompositeOperation = 'source-over'; g.drawImage(rc, 0, 0);
-  const [wc, wg] = mk(); wg.drawImage(spr, 0, 0, px, px); wg.globalCompositeOperation = 'source-in'; wg.fillStyle = '#fff'; wg.fillRect(0, 0, px, px);
-  o = { lit: c, white: wc }; litCache.set(key, o); return o;
-}
-
 const biomeIdx = () => Math.floor((S.zone - 1) / 10) % BIOMES.length;
 
 /* ================= enemies & zones ================= */
@@ -2480,6 +3019,40 @@ function useSkill(id) {
 }
 
 /* ================= game loop ================= */
+// Атаки боссов описаны данными: click/allies/guard — секунды ослабления, chakra — потеря чакры,
+// timer — секунды, снятые с таймера босса, heal — доля восстановленного здоровья.
+const BOSS_ATTACKS = {
+  mist:      { click: 4, text: 'скрывается в тумане: клики ослаблены!' },
+  drain:     { chakra: 22, text: 'поглощает 22 чакры!' },
+  guard:     { guard: 5, text: 'поднимает непробиваемую защиту: твой урон снижен!' },
+  blast:     { timer: 5, text: 'взрывает поле боя: время сокращается!' },
+  paper:     { click: 3, timer: 2, text: 'окружает отряд взрывными бумажными печатями!' },
+  genjutsu:  { allies: 4, text: 'затягивает отряд в гендзюцу!' },
+  gravity:   { chakra: 18, click: 3, text: 'обрушивает на поле боя гравитацию!' },
+  kamui:     { heal: 0.08, text: 'уходит в измерение Камуи и восстанавливает 8% здоровья!' },
+  meteor:    { guard: 5, timer: 3, text: 'призывает метеор: времени и сил становится меньше!' },
+  dimension: { chakra: 25, heal: 0.05, text: 'меняет измерение, поглощая чакру и восстанавливаясь!' },
+  rhythm:    { click: 4, text: 'сбивает твой ритм: клики ослаблены!' },
+  drain18:   { chakra: 18, text: 'поглощает 18 чакры!' },
+  suppress:  { allies: 4, text: 'подавляет союзников на 4 секунды!' },
+  haste:     { timer: 3, text: 'ускоряет ход времени!' },
+  regen:     { heal: 0.08, text: 'восстанавливает 8% здоровья!' },
+  stone:     { guard: 5, text: 'поднимает каменный щит: твой урон снижен!' },
+  moon:      { chakra: 28, click: 3, text: 'выпускает лунный импульс и гасит чакру!' },
+  rift:      { heal: 0.05, timer: 2, text: 'разрывает пространство: здоровье и время возвращаются!' }
+};
+const REGULAR_ATTACKS = ['rhythm', 'drain18', 'suppress', 'haste', 'regen', 'stone', 'moon', 'rift'];   // по индексу обычного босса
+function applyBossAttack(e, a) {
+  if (a.click || a.allies || a.guard) R.debuff = R.debuff || {};
+  if (a.click) R.debuff.click = a.click;
+  if (a.allies) R.debuff.allies = a.allies;
+  if (a.guard) R.debuff.guard = a.guard;
+  if (a.chakra) S.chakra = Math.max(0, S.chakra - a.chakra);
+  if (a.timer) e.timer = Math.max(0, e.timer - a.timer);
+  if (a.heal) e.hp = Math.min(e.max, e.hp + e.max * a.heal);
+  e.atkT = 0.5;                                              // анимация замаха на сцене
+  toast(e.name + ' ' + a.text);
+}
 function tick(dt) {
   R.t += dt;
   S.chakra = Math.min(100, S.chakra + (2 + passiveTotals().chakra + taiTotals().chakra + legacyComboTotals().chakra) * (1 + synergyTotals().chakra) * (R.buff.gamabunta > 0 ? 2 : 1) * dt);
@@ -2531,27 +3104,8 @@ function tick(dt) {
         e.attackT -= dt;
         if (e.attackT <= 0) {
           e.attackT = e.phaseStep >= 2 ? 6 : 9;
-          const ix = e.bossIndex;
-          if (e.specialBoss) {
-            const sb = SPECIAL_BOSSES[e.specialBossIndex];
-            if (sb.attack === 'mist') { R.debuff = R.debuff || {}; R.debuff.click = 4; toast(e.name + ' скрывается в тумане: клики ослаблены!'); }
-            else if (sb.attack === 'drain') { S.chakra = Math.max(0, S.chakra - 22); toast(e.name + ' поглощает 22 чакры!'); }
-            else if (sb.attack === 'guard') { R.debuff = R.debuff || {}; R.debuff.guard = 5; toast(e.name + ' поднимает непробиваемую защиту: твой урон снижен!'); }
-            else if (sb.attack === 'blast') { e.timer = Math.max(0, e.timer - 5); toast(e.name + ' взрывает поле боя: время сокращается!'); }
-            else if (sb.attack === 'paper') { R.debuff = R.debuff || {}; R.debuff.click = 3; e.timer = Math.max(0, e.timer - 2); toast(e.name + ' окружает отряд взрывными бумажными печатями!'); }
-            else if (sb.attack === 'genjutsu') { R.debuff = R.debuff || {}; R.debuff.allies = 4; toast(e.name + ' затягивает отряд в гендзюцу!'); }
-            else if (sb.attack === 'gravity') { S.chakra = Math.max(0, S.chakra - 18); R.debuff = R.debuff || {}; R.debuff.click = 3; toast(e.name + ' обрушивает на поле боя гравитацию!'); }
-            else if (sb.attack === 'kamui') { e.hp = Math.min(e.max, e.hp + e.max * .08); toast(e.name + ' уходит в измерение Камуи и восстанавливает 8% здоровья!'); }
-            else if (sb.attack === 'meteor') { R.debuff = R.debuff || {}; R.debuff.guard = 5; e.timer = Math.max(0, e.timer - 3); toast(e.name + ' призывает метеор: времени и сил становится меньше!'); }
-            else if (sb.attack === 'dimension') { S.chakra = Math.max(0, S.chakra - 25); e.hp = Math.min(e.max, e.hp + e.max * .05); toast(e.name + ' меняет измерение, поглощая чакру и восстанавливаясь!'); }
-          } else if (ix === 0) { R.debuff = R.debuff || {}; R.debuff.click = 4; toast(e.name + ' сбивает твой ритм: клики ослаблены!'); }
-          else if (ix === 1) { S.chakra = Math.max(0, S.chakra - 18); toast(e.name + ' поглощает 18 чакры!'); }
-          else if (ix === 2) { R.debuff = R.debuff || {}; R.debuff.allies = 4; toast(e.name + ' подавляет союзников на 4 секунды!'); }
-          else if (ix === 3) { e.timer = Math.max(0, e.timer - 3); toast(e.name + ' ускоряет ход времени!'); }
-          else if (ix === 4) { e.hp = Math.min(e.max, e.hp + e.max * .08); toast(e.name + ' восстанавливает 8% здоровья!'); }
-          else if (ix === 5) { R.debuff = R.debuff || {}; R.debuff.guard = 5; toast(e.name + ' поднимает каменный щит: твой урон снижен!'); }
-          else if (ix === 6) { S.chakra = Math.max(0, S.chakra - 28); R.debuff = R.debuff || {}; R.debuff.click = 3; toast(e.name + ' выпускает лунный импульс и гасит чакру!'); }
-          else { e.hp = Math.min(e.max, e.hp + e.max * .05); e.timer = Math.max(0, e.timer - 2); toast(e.name + ' разрывает пространство: здоровье и время возвращаются!'); }
+          const key = e.specialBoss ? SPECIAL_BOSSES[e.specialBossIndex].attack : REGULAR_ATTACKS[Math.min(e.bossIndex, REGULAR_ATTACKS.length - 1)];
+          if (BOSS_ATTACKS[key]) applyBossAttack(e, BOSS_ATTACKS[key]);
         }
         if (e.timer <= 0) {
           const izanagi = dojutsuTotals().izanagiSeconds + legacyComboTotals().izanagiSeconds;
@@ -2729,18 +3283,15 @@ function draw(t) {
   /* враг */
   const e = R.enemy;
   if (e) {
-    const gm = enemyGeom(), spr = sprite(e.kind, 'b' + bi, b.pal);
-    const o = litEnemy(spr, gm.size, e.kind + '|' + bi + '|' + gm.size);
-    let dy = e.kind === 'wisp' ? Math.round(Math.sin(T * 4 + e.phase) * 4) - 8 : (fxOn ? Math.sin(T * 2.5 + e.phase) * 1.2 : 0);
+    const gm = enemyGeom();
+    let dy = e.kind === 'wisp' && !e.boss ? Math.sin(T * 4 + e.phase) * 4 - 8 : (fxOn ? Math.sin(T * 2.5 + e.phase) * 0.8 : 0);
     if (e.hitT > 0) e.hitT = Math.max(0, e.hitT - dtD);
+    if (e.atkT > 0) e.atkT = Math.max(0, e.atkT - dtD);
     const sxs = !fxOn || R.shake <= 0 ? 0 : (Math.random() - 0.5) * R.shake * 4;
     let al = 1; if (e.dying) { dy += e.dying * 40; al = Math.max(0, 1 - e.dying / 0.35); }
-    softShadow(g, gm.cx, GROUND + 1, gm.size * 0.42, 6, 0.5 * al);
+    softShadow(g, gm.cx, GROUND + 1, gm.size * 0.4, 6, 0.5 * al);
     if (e.boss && fxOn) { g.save(); g.globalCompositeOperation = 'lighter'; glow(g, gm.cx, GROUND - gm.size * 0.5, gm.size * 0.85, e.specialBoss ? '255,200,80' : '255,60,60', (0.18 + 0.06 * Math.sin(T * 3)) * al); g.restore(); }
-    g.save(); g.globalAlpha = al; g.translate(gm.x + gm.size + sxs, GROUND - gm.size + dy); g.scale(-1, 1);
-    g.drawImage(o.lit, 0, 0, gm.size, gm.size);
-    if (e.hitT > 0) { g.globalAlpha = al * 0.75 * (e.hitT / 0.1); g.drawImage(o.white, 0, 0, gm.size, gm.size); }
-    g.restore();
+    drawEnemyArt(g, e, gm, t, { dx: sxs, dy, alpha: al, flash: e.hitT > 0 ? e.hitT / 0.1 : 0, calm: !fxOn });
   }
 
   /* эффекты */
@@ -2985,7 +3536,7 @@ function returnHome() {
   const legendaryBossKills = S.legendaryBossKills || 0;
   const permanentSquadSlots = unlockedSquadSlots();
 
-  const n = newState(false);
+  const n = carryAccount(newState(false));
   n.eye = eye;
   n.points = points;
   n.senjuTree = senjuTree;
@@ -3021,7 +3572,7 @@ function trueRebirth() {
 
   // Вклад в Додзюцу (потраченные очки) и свободный запас полностью конвертируются в наследие Сенджу.
   const projection = senjuProjection(sacrificedEye);
-  const n = newState(false);
+  const n = carryAccount(newState(false));
   n.rebirths = (S.rebirths || 0) + 1;
   n.bestEver = S.bestEver;
   n.allyStoriesUnlocked = Array.isArray(S.allyStoriesUnlocked) ? S.allyStoriesUnlocked.slice() : ALLIES.filter((a, i) => (S.allies[i] || 0) > 0).map((a) => a.id);
@@ -3124,11 +3675,58 @@ function updateVillage() {
   });
 }
 
+/* ================= тестовый режим: отдельное сохранение ================= */
+function applyTestUI() {
+  document.body.classList.toggle('testing', TEST.on);
+  $('#testBanner').hidden = !TEST.on;
+  $('#testOff').hidden = TEST.on; $('#testOn').hidden = !TEST.on;
+  $$('#testSpeed [data-speed]').forEach((b) => b.setAttribute('aria-pressed', String(+b.dataset.speed === TEST.speed)));
+}
+function testRuntimeReset() {
+  const keep = { skillReadyAt: S.skillReadyAt, chakra: S.chakra, sixPathsStacks: S.sixPathsStacks };
+  clearRuntimeKeepState(); Object.assign(S, keep); restoreTechniqueCooldowns();
+  DERIVED_SIGNATURE = ''; spawn(); updateUI(true);
+}
+function enterTest(fromCopy) {
+  if (!TEST.on) save(true);                                // основной прогресс фиксируется до входа
+  TEST.on = true; TEST.fromCopy = !!fromCopy; TEST.speed = 1;
+  if (fromCopy) S = JSON.parse(JSON.stringify(S)); else S = newState(true);
+  try { localStorage.setItem(MODE_KEY, 'test'); } catch (e) {}
+  save(); applyTestUI(); testRuntimeReset(); setTab('allies');
+  toast(fromCopy ? 'Тест на копии прогресса. Основное сохранение не изменится.' : 'Тест с нуля. Основное сохранение не изменится.');
+}
+function exitTest() {
+  if (!TEST.on) return;
+  TEST.on = false; TEST.speed = 1;
+  try { localStorage.removeItem(MODE_KEY); } catch (e) {}
+  if (!load()) S = newState(true);
+  applyTestUI(); testRuntimeReset(); applyVisualSettings(); syncMenuSettings();
+  toast('Тест завершён. Вернулся основной прогресс.');
+}
+function testAction(a, arg) {
+  if (a === 'enter-copy') return enterTest(true);
+  if (a === 'enter-fresh') return enterTest(false);
+  if (!TEST.on) return;
+  if (a === 'exit') return exitTest();
+  switch (a) {
+    case 'speed': TEST.speed = +arg || 1; break;
+    case 'prepare': S.zone = 100; S.maxZone = Math.max(S.maxZone, 100); S.bestEver = Math.max(S.bestEver, 100); S.points = Math.max(S.points, 100); S.eyePointsClaimed = 0; S.homeRewardZone = 1; S.villageScrolls = Math.max(S.villageScrolls, 19); S.villageReputation = Math.max(S.villageReputation, 9); S.recruitedBosses = []; S.claimedBossZones = []; spawn(); toast('Тестовый прогресс: зона 100, 100 Очков Глаза, ресурсы деревни.'); break;
+    case 'gold': S.gold += +arg || 0; break;
+    case 'zone': { const z = Math.max(1, Math.min(1400, Math.floor(+$('#testZone').value) || 1)); goZone(z); spawn(); break; }
+    case 'chakra': S.chakra = 100; R.cd = { clone: 0, fox: 0, rasengan: 0, sage: 0, gamabunta: 0, delayed: 0, tailed: 0, sixpaths: 0 }; S.skillReadyAt = {}; break;
+    default: return;
+  }
+  save(); applyTestUI(); updateUI(true);
+}
 function resetAll() {
+  if (TEST.on) { enterTest(false); return; }               // в тесте «стереть» перезапускает тест, основное сохранение недоступно
+  const settings = S.settings;
   try { localStorage.removeItem(KEY); } catch (e) {}
-  S = newState(true);
-  R.cd = { clone: 0, fox: 0, rasengan: 0, sage: 0, gamabunta: 0, delayed: 0, tailed: 0, sixpaths: 0 }; R.buff = { clone: 0, fox: 0, sage: 0, gamabunta: 0, delayed: 0, tailed: 0 }; S.skillReadyAt = {}; S.sixPathsStacks = 0; R.debuff = {}; R.combo = 0;
+  S = newState(true); S.settings = settings;
+  clearRuntimeKeepState();
+  S.skillReadyAt = {};
   $('#hint').classList.remove('off');
+  cloudLast = ''; save(true);
   spawn(); setTab('allies'); toast('Сохранение стёрто. Начинаем с нуля.'); updateUI(true);
 }
 function twoStep(btn, idle, sure, fn) {
@@ -3742,8 +4340,8 @@ twoStep($('#btnReturnHome'), 'Вернуться в деревню', 'Подтв
 twoStep($('#btnTrueRebirth'), 'Истинное перерождение', 'Принести Очки Глаза в жертву?', trueRebirth);
 $('#senjuTree').addEventListener('click', (ev) => { const b = ev.target.closest('[data-buy-senju]'); if (b && !b.disabled) buySenjuNode(b.dataset.buySenju); });
 $('#villageBuildings').addEventListener('click', (ev) => { const b = ev.target.closest('[data-buy-building]'); if (b && !b.disabled) buyVillageBuilding(b.dataset.buyBuilding); });
-$('#previewTools').hidden = !!(window.Telegram && window.Telegram.WebApp);
-$('#btnPreparePreview').addEventListener('click', () => { S.zone = 100; S.maxZone = Math.max(S.maxZone, 100); S.bestEver = Math.max(S.bestEver, 100); S.points = Math.max(S.points, 100); S.eyePointsClaimed = 0; S.homeRewardZone = 1; S.villageScrolls = Math.max(S.villageScrolls, 19); S.villageReputation = Math.max(S.villageReputation, 9); S.recruitedBosses = []; S.claimedBossZones = []; spawn(); updateUI(true); save(); toast('Тестовый прогресс подготовлен: зона 100, 100 Очков Глаза и ресурсы деревни.'); });
+$('#testLab').addEventListener('click', (ev) => { const b = ev.target.closest('[data-test]'); if (b) testAction(b.dataset.test, b.dataset.arg); });
+$('#testBannerExit').addEventListener('click', exitTest);
 twoStep($('#btnReset'), 'Стереть сохранение', 'Точно стереть? Нажми ещё раз', resetAll);
 
 /* ================= offline & boot ================= */
@@ -3755,31 +4353,36 @@ function offlineGain(sec) {
   toast('Пока тебя не было, отряд заработал ' + fmt(gain) + ' Рё');
 }
 
-const loaded = load();
+let loaded = false;
+try { if (localStorage.getItem(MODE_KEY) === 'test' && localStorage.getItem(TEST_KEY)) { TEST.on = true; loaded = load(TEST_KEY); if (!loaded) TEST.on = false; } } catch (e) {}
+if (!TEST.on) { try { localStorage.removeItem(MODE_KEY); } catch (e) {} loaded = load(); }
 applyVisualSettings();
 syncMenuSettings();
 restoreTechniqueCooldowns();
-if (loaded) offlineGain((Date.now() - S.savedAt) / 1000);
+if (loaded && !TEST.on) offlineGain((Date.now() - S.savedAt) / 1000);
 buildPips(); buildSkills(); buildAllies(); buildTap(); buildEyes(); buildProgressionUI();
 if (S.seen) $('#hint').classList.add('off');
 renderShop();
-spawn(); setTab('allies');
+spawn(); setTab('allies'); applyTestUI();
 if (TG && TG.initData) refreshShop(false);
+cloudPull(loaded);
 
 let last = performance.now();
 function frame(now) {
   let real = (now - last) / 1000; last = now;
-  if (real > 5) { offlineGain(real); real = 0.05; }
+  if (real > 5) { if (!TEST.on) offlineGain(real); real = 0.05; }
   const dt = Math.min(real, 0.25);
-  tick(dt);
+  let left = dt * (TEST.on ? TEST.speed : 1), steps = 0;     // в тесте ускорение идёт мелкими шагами, физика не ломается
+  while (left > 1e-9 && steps < 60) { const d = Math.min(left, 0.1); tick(d); left -= d; steps++; }
   draw(now);
   R.uiT += dt; if (R.uiT >= 0.15) { R.uiT %= 0.15; updateUI(); }
   R.saveT += dt; if (R.saveT >= 8) { R.saveT = 0; save(); }
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
-document.addEventListener('visibilitychange', () => { if (document.hidden) save(); });
-window.addEventListener('pagehide', save);
+document.addEventListener('visibilitychange', () => { if (document.hidden) save(true); });
+window.addEventListener('pagehide', () => save(true));
+try { if (TG && TG.onEvent) TG.onEvent('deactivated', () => save(true)); } catch (e) {}
 })();
 </script>
 
